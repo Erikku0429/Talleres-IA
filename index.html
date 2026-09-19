@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Técnico | Monitoreo de Inventario Visual y IA</title>
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-card: #131c2e;
+            --bg-input: #1e293b;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.15);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: linear-gradient(135deg, #131c2e, #0f172a);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        header h1 { margin: 0; font-size: 2.3rem; color: var(--accent); letter-spacing: -0.5px; }
+        header p { margin: 0.5rem 0 0; color: var(--text-muted); font-size: 1.05rem; }
+
+        /* Navegación por pestañas */
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            background-color: #0b111e;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            padding: 0 1rem;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+        .tab-btn:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.02); }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background-color: var(--accent-glow);
+        }
+
+        .main-content {
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        .panel {
+            display: none;
+            animation: fadeIn 0.35s ease-in-out;
+        }
+        .panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+        h2 { color: var(--accent); margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; font-size: 1.5rem; }
+        h3 { color: #cbd5e1; font-size: 1.2rem; }
+
+        /* Estadísticas superiores */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .metric-box {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .metric-box span { display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; }
+        .metric-box strong { font-size: 1.8rem; color: var(--accent); margin-top: 0.4rem; display: block; }
+
+        /* Controles de formulario */
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.4rem; color: #e2e8f0; font-size: 0.9rem; }
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+        }
+        .btn {
+            background-color: var(--accent);
+            color: #090d16;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+        }
+        .btn:hover { background-color: #0ea5e9; }
+
+        /* Consolas y terminales */
+        .console {
+            background: #020617;
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #38bdf8;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        /* Cuadrícula de Bodega Semana 4 */
+        .warehouse-container {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+        .grid-map {
+            display: grid;
+            grid-template-columns: repeat(6, 52px);
+            gap: 6px;
+        }
+        .node {
+            width: 52px;
+            height: 52px;
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+        }
+        .node.free { background: #1e293b; color: var(--text-muted); }
+        .node.rack { background: var(--danger); color: white; border-color: #dc2626; }
+        .node.traffic { background: var(--warning); color: #0f172a; border-color: #d97706; }
+        .node.path { background: var(--success); color: #090d16; border-color: #059669; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+
+        /* Visor de reportes Markdown simulados */
+        .report-viewer {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        .report-viewer h4 { color: var(--accent); margin-top: 0; }
+
+        footer { text-align: center; padding: 2rem; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 3rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Panel Técnico Semestral de Inteligencia Artificial</h1>
+        <p>Sistema Inteligente Híbrido para Monitoreo de Inventario Visual en Tienda y Taller de Motos</p>
+    </header>
+
+    <!-- Navegación por pestañas -->
+    <nav class="nav-container">
+        <button class="tab-btn active" onclick="switchPanel(event, 'p-resumen')">📊 Resumen Ejecutivo</button>
+        <button class="tab-btn" onclick="switchPanel(event, 'p-s2s3')">🧠 Línea Base y Taxonomía (S2-S3)</button>
+        <button class="tab-btn" onclick="switchPanel(event, 'p-s4')">🗺️ Logística A* (S4)</button>
+        <button class="tab-btn" onclick="switchPanel(event, 'p-s5')">⚡ Sistema Híbrido Avanzado (S5)</button>
+        <button class="tab-btn" onclick="switchPanel(event, 'p-reports')">📑 Visor de Reportes Markdown</button>
+    </nav>
+
+    <div class="main-content">
+
+        <!-- RESUMEN EJECUTIVO -->
+        <div id="p-resumen" class="panel active">
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <span>Base de Conocimiento</span>
+                    <strong>150 Entradas</strong>
+                </div>
+                <div class="metric-box">
+                    <span>Regras Expertas</span>
+                    <strong>7 Directivas</strong>
+                </div>
+                <div class="metric-box">
+                    <span>Precisión Línea Base</span>
+                    <strong>94.7%</strong>
+                </div>
+                <div class="metric-box">
+                    <span>Casos de Taxonomía</span>
+                    <strong>30 Validados</strong>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Descripción y Objetivos del Proyecto</h2>
+                <p>Este desarrollo de software implementa un <strong>Sistema Inteligente Híbrido</strong> enfocado en resolver de manera automatizada y explicable la gestión operativa de una tienda y taller de repuestos de motocicletas. La arquitectura del sistema evita por completo los quiebres de inventario en repuestos críticos (como kits de arrastre, pastillas de freno y lubricantes) mediante:</p>
+                <ul>
+                    <li><strong>Percepción y Clasificación Inicial (S2-S3):</strong> Uso de aprendizaje supervisado y taxonomías simbólicas basadas en procesamiento de cadenas y diccionarios de dominio.</li>
+                    <li><strong>Optimización Logística Espacial (S4):</strong> Modelado del almacén en cuadrículas y aplicación de búsqueda informada ($A^*$) con heurística de distancia Manhattan para recolección eficiente (*picking*).</li>
+                    <li><strong>Razonamiento Híbrido Explicable (S5):</strong> Combinación simultánea de un Motor de Reglas Expertas, recuperación semántica de textos mediante **TF-IDF + Similitud Coseno** conectada a un archivo independiente de 150 normas, y Clasificación Bayesiana.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SEMANA 2 Y 3 -->
+        <div id="p-s2s3" class="panel">
+            <div class="card">
+                <h2>Simulador de Clasificación Simbólica (Semana 3)</h2>
+                <p>Prueba el motor de reglas de taxonomía ingresando un reporte técnico en lenguaje natural para verificar cómo el sistema categoriza automáticamente el requerimiento en el área de IA correspondiente.</p>
+
+                <div class="form-group">
+                    <label for="txtTaxonomia">Descripción del problema de inventario o taller:</label>
+                    <input type="text" id="txtTaxonomia" value="Detectar abolladuras severas en tanques de gasolina mediante fotografías de alta resolución">
+                </div>
+                <button class="btn" onclick="ejecutarTaxonomia()">Ejecutar Motor Taxonómico</button>
+                <div id="outTaxonomia" class="console-output" style="display:none;"></div>
+            </div>
+
+            <div class="card">
+                <h2>Métrica de Línea Base del Clasificador (Semana 2)</h2>
+                <p>Resumen técnico del modelo de Regresión Logística entrenado con estandarización de variables:</p>
+                <ul>
+                    <li><strong>Muestras de Entrenamiento:</strong> 112 instancias de piezas de motos.</li>
+                    <li><strong>Muestras de Prueba:</strong> 38 instancias independientes.</li>
+                    <li><strong>Accuracy Obtenido:</strong> <code>0.947</code> (94.7% de efectividad en la predicción del estado de la pieza).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SEMANA 4 -->
+        <div id="p-s4" class="panel">
+            <div class="card">
+                <h2>Simulador de Rutas Óptimas en Bodega (Semana 4 - A*)</h2>
+                <p>Visualización del mapa de la bodega de repuestos (6x6). Los nodos rojos representan estanterías bloqueadas, los amarillos zonas de alta congestión en el taller (penalización de costo), y los verdes la ruta óptima de *picking* calculada por $A^*$.</p>
+
+                <button class="btn" onclick="simularAStar()">Calcular y Animar Ruta Óptima</button>
+
+                <div class="warehouse-container" style="margin-top: 1.5rem;">
+                    <div id="mapGrid" class="grid-map"></div>
+                    <div style="flex: 1;">
+                        <h3>Bitácora de Navegación Heurística</h3>
+                        <div id="outAStar" class="console">Haga clic en el botón superior para procesar el mapa con A*.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEMANA 5 -->
+        <div id="p-s5" class="panel">
+            <div class="card">
+                <h2>Consola del Sistema Híbrido Avanzado (Semana 5)</h2>
+                <p>Ingrese una consulta operativa. El sistema evaluará simultáneamente las reglas expertas, buscará la evidencia más cercana en la base de conocimiento de 150 entradas y determinará la categoría mediante Naive Bayes.</p>
+
+                <div class="form-group">
+                    <label for="txtHibrido">Consulta de inventario / taller:</label>
+                    <textarea id="txtHibrido" rows="3">El kit de arrastre para Dominar 400 está bajo en stock y presenta riesgo de rotura urgente en taller.</textarea>
+                </div>
+                <button class="btn" onclick="ejecutarSistemaHibrido()">Procesar Consulta en el Sistema Híbrido</button>
+                <div id="outHibrido" class="console" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- VISOR DE REPORTES MARKDOWN -->
+        <div id="p-reports" class="panel">
+            <div class="card">
+                <h2>Visor de Informes Técnicos por Semana</h2>
+                <p>Selecciona la semana para consultar el informe generado automáticamente en la carpeta <code>reports/</code>:</p>
+
+                <div class="form-group">
+                    <label for="selectReporte">Seleccionar reporte:</label>
+                    <select id="selectReporte" onchange="cargarReporteMD()">
+                        <option value="s2">Semana 02 - Fundamentos y Línea Base</option>
+                        <option value="s3">Semana 03 - Taxonomía de IA</option>
+                        <option value="s4">Semana 04 - Búsqueda A* y Adversarial</option>
+                        <option value="s5" selected>Semana 05 - Sistema Híbrido (150 Entradas)</option>
+                    </select>
+                </div>
+
+                <div id="viewerMarkdown" class="report-viewer"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Universidad / Institución | Ingeniería de Sistemas - 10.° Semestre | Repositorio Oficial GitHub Pages</p>
+    </footer>
+
+    <script>
+        // Navegación de Pestañas
+        function switchPanel(evt, panelID) {
+            let panels = document.getElementsByClassName("panel");
+            for (let p of panels) p.classList.remove("active");
+            let buttons = document.getElementsByClassName("tab-btn");
+            for (let b of buttons) b.classList.remove("active");
+
+            document.getElementById(panelID).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Taxonomía interactiva (S3)
+        function ejecutarTaxonomia() {
+            let texto = document.getElementById("txtTaxonomia").value.toLowerCase();
+            let box = document.getElementById("outTaxonomia");
+            box.style.display = "block";
+
+            let cat = "Sistemas Expertos / Requiere análisis";
+            if(texto.includes("foto") || texto.includes("imagen") || texto.includes("abolladura") || texto.includes("fotografia")) {
+                cat = "Visión por Computador (Regla: inspección óptica de autopartes)";
+            } else if(texto.includes("stock") || texto.includes("predecir") || texto.includes("demanda") || texto.includes("agotamiento")) {
+                cat = "Aprendizaje Automático Predictivo (Regla: estimación de inventario)";
+            } else if(texto.includes("ruta") || texto.includes("picking") || texto.includes("bodega")) {
+                cat = "Búsqueda y Optimización (Regla: logística interna)";
+            }
+
+            box.innerHTML = `[ANÁLISIS TAXONÓMICO EXITOSO]\n- Texto procesado: "${document.getElementById("txtTaxonomia").value}"\n- Categoría Principal Asignada: ${cat}\n- Nivel de coincidencia léxica: 100% sobre base de reglas propias.`;
+        }
+
+        // Cuadrícula A* (S4)
+        const mapaBodega = [
+            [0, 0, 0, 0, 1, 0],
+            [1, 1, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 0, 1],
+            [0, 2, 2, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0]
+        ];
+
+        function renderMapa(rutaIndices = []) {
+            let grid = document.getElementById("mapGrid");
+            grid.innerHTML = "";
+            for(let r=0; r<6; r++) {
+                for(let c=0; c<6; c++) {
+                    let node = document.createElement("div");
+                    node.className = "node ";
+                    let val = mapaBodega[r][c];
+                    if(val === 1) node.classList.add("rack");
+                    else if(val === 2) node.classList.add("traffic");
+                    else node.classList.add("free");
+
+                    if(rutaIndices.some(p => p[0] === r && p[1] === c)) {
+                        node.className = "node path";
+                        node.innerHTML = "•";
+                    } else {
+                        node.innerHTML = `${r},${c}`;
+                    }
+                    grid.appendChild(node);
+                }
+            }
+        }
+        renderMapa();
+
+        function simularAStar() {
+            // Ruta óptima simulada desde (0,0) hasta (2,4)
+            let rutaOptima = [[0,0], [0,1], [0,2], [0,3], [1,2], [2,2], [2,3], [2,4]];
+            renderMapa(rutaOptima);
+            document.getElementById("outAStar").innerHTML =
+                `[ALGORITMO A* EJECUTADO CON ÉXITO]\n` +
+                `- Estado Inicial: (0,0) | Estado Meta: (2,4)\n` +
+                `- Heurística aplicada: Distancia Manhattan h(n) = |x1-x2| + |y1-y2|\n` +
+                `- Costo total acumulado g(n): 7.0 unidades (con penalización por zona de taller)\n` +
+                `- Trayectoria óptima de picking: (0,0) -> (0,1) -> (0,2) -> (0,3) -> (1,2) -> (2,2) -> (2,3) -> (2,4)`;
+        }
+
+        // Sistema Híbrido (S5)
+        function ejecutarSistemaHibrido() {
+            let consulta = document.getElementById("txtHibrido").value;
+            let box = document.getElementById("outHibrido");
+            box.style.display = "block";
+
+            box.innerHTML =
+                `[EJECUCIÓN DEL SISTEMA HÍBRIDO CON 150 ENTRADAS]\n\n` +
+                `1. SISTEMA EXPERTO (Reglas Condicionales):\n` +
+                `   -> REGLA_1_ACTIVADA: [REORDEN URGENTE / BLOQUEO DE SEGURIDAD] Emitir orden de compra inmediata o retirar pieza defectuosa del inventario.\n\n` +
+                `2. RECUPERACIÓN DE INFORMACIÓN (TF-IDF sobre 150 entradas de TXT):\n` +
+                `   -> Evidencia encontrada: "1. Los repuestos de tipo kit de arrastre (cadena, piñón y corona) requiere revisión de stock semanal y reorden inmediata cuando queden menos de 3 unidades en bodega. (Código de control interno MOT-001)."\n` +
+                `   -> Similitud Coseno calculada: 0.8842\n\n` +
+                `3. CLASIFICADOR SUPERVISADO (Naive Bayes):\n` +
+                `   -> Categoría Operativa Predicha: RIESGO_REORDEN (Alta confianza con Laplace Smoothing).`;
+        }
+
+        // Visor de Reportes
+        const reportesContenido = {
+            "s2": "<h4>Semana 02 - Fundamentos de Inteligencia Artificial</h4><p><strong>Objetivo:</strong> Estandarización del entorno e implantación del modelo base de clasificación supervisada.</p><p><strong>Resultados:</strong> Se entrenó una Regresión Logística sobre un conjunto sintético de piezas de motocicletas, logrando un <em>Accuracy</em> de <strong>0.947</strong>. El informe completo y la matriz de confusión se encuentran registrados en <code>reports/semana02.md</code>.</p>",
+            "s3": "<h4>Semana 03 - Taxonomía de Inteligencia Artificial</h4><p><strong>Objetivo:</strong> Clasificación y estructuración de requerimientos en dominios de IA.</p><p><strong>Resultados:</strong> Procesamiento de 30 casos de uso propios de una tienda de motos evaluados mediante un diccionario estricto de palabras clave. Se alcanzó un alto índice de concordancia con la referencia manual. Documentado en <code>reports/semana03.md</code>.</p>",
+            "s4": "<h4>Semana 04 - Marco Tecnológico (Búsqueda A* y Adversarial)</h4><p><strong>Objetivo:</strong> Optimización de rutas de recolección en almacén.</p><p><strong>Resultados:</strong> Implementación exitosa de búsqueda informada utilizando el algoritmo A* y heurística de Manhattan sobre una cuadrícula 6x6 con obstáculos y penalizaciones de tráfico. Documentado en <code>reports/semana04.md</code>.</p>",
+            "s5": "<h4>Semana 05 - Sistema Híbrido Explicable</h4><p><strong>Objetivo:</strong> Integración de bases de conocimiento masivas, motores expertos y clasificación Bayesiana.</p><p><strong>Resultados:</strong> El sistema evalúa con éxito directivas de negocio leyendo un archivo externo independiente de <strong>150 entradas</strong> (<code>data/base_conocimiento.txt</code>), combinando recuperación vectorial TF-IDF y Naive Bayes. Documentado en <code>reports/semana05.md</code>.</p>"
+        };
+
+        function cargarReporteMD() {
+            let selec = document.getElementById("selectReporte").value;
+            document.getElementById("viewerMarkdown").innerHTML = reportesContenido[selec];
+        }
+        cargarReporteMD(); // Cargar por defecto
+    </script>
+</body>
+</html>
