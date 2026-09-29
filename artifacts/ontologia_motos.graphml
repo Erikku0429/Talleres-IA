@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="label" for="node" attr.name="label" attr.type="string"/>
+  <key id="relation" for="edge" attr.name="relation" attr.type="string"/>
+  <graph id="Ontologia_Inventario_Motos" edgedefault="directed">
+    <node id="ImagenRepuesto"><data key="label">ImagenRepuesto</data></node>
+    <node id="RedNeuronal"><data key="label">RedNeuronal</data></node>
+    <node id="ClasePieza"><data key="label">ClasePieza</data></node>
+    <node id="EstadoReconocimiento"><data key="label">EstadoReconocimiento</data></node>
+    <node id="BaseDeDatos"><data key="label">BaseDeDatos</data></node>
+
+    <edge source="ImagenRepuesto" target="RedNeuronal"><data key="relation">procesada_por</data></edge>
+    <edge source="RedNeuronal" target="ClasePieza"><data key="relation">predice_categoria</data></edge>
+    <edge source="RedNeuronal" target="EstadoReconocimiento"><data key="relation">valida_certidumbre_de</data></edge>
+    <edge source="EstadoReconocimiento" target="BaseDeDatos"><data key="relation">registra_evidencia_en</data></edge>
+    <edge source="BaseDeDatos" target="ImagenRepuesto"><data key="relation">audita_historial_de</data></edge>
+  </graph>
+</graphml>
