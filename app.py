@@ -72,12 +72,13 @@ st.markdown("Plataforma avanzada para la gestión automatizada de inventario de 
 
 # NAVEGACIÓN POR PESTAÑAS (MODULAR)
 
-tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s8, tab_s9 = st.tabs([
+tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s7, tab_s8, tab_s9 = st.tabs([
     "📊 Resumen Ejecutivo",
     "🤖 Semana 2: Línea Base",
     "🔍 Semana 3: Taxonomía",
     "🗺️ Semana 4: Dashboard A*",
     "⚡ Semana 5: Sistema Híbrido",
+    "📐 Semana 7: Representaciones",
     "👁️ Semana 8: Reconocimiento IA",
     "🔬 Semana 9: Visión Computacional"
 ])
@@ -86,7 +87,7 @@ tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s8, tab_s9 = st.tabs([
 
 with tab_resumen:
     st.header("Arquitectura Semestral del Proyecto")
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
     with col1:
         st.markdown('<div class="metric-card"><h3>Semana 2</h3><p>94.7%</p><small>Accuracy Base</small></div>',
                     unsafe_allow_html=True)
@@ -98,15 +99,19 @@ with tab_resumen:
                     unsafe_allow_html=True)
     with col4:
         st.markdown(
-            '<div class="metric-card"><h3>Semana 5</h3><p>150 Entradas</p><small>Base de Conocimiento</small></div>',
+            '<div class="metric-card"><h3>Semana 5</h3><p>150 Entradas</p><small>Base Conocimiento</small></div>',
             unsafe_allow_html=True)
     with col5:
         st.markdown(
-            '<div class="metric-card"><h3>Semana 8</h3><p>MLP 100%</p><small>Auditoría SQLite</small></div>',
+            '<div class="metric-card"><h3>Semana 7</h3><p>3 Modelos</p><small>Num + Simb + AFD</small></div>',
             unsafe_allow_html=True)
     with col6:
         st.markdown(
-            '<div class="metric-card"><h3>Semana 9</h3><p>Canny + Otsu</p><small>23 Regiones Conexas</small></div>',
+            '<div class="metric-card"><h3>Semana 8</h3><p>MLP 100%</p><small>Auditoría SQLite</small></div>',
+            unsafe_allow_html=True)
+    with col7:
+        st.markdown(
+            '<div class="metric-card"><h3>Semana 9</h3><p>Canny + Otsu</p><small>23 Regiones</small></div>',
             unsafe_allow_html=True)
 
 # 2. SEMANA 2: LÍNEA BASE (MACHINE LEARNING)
@@ -307,7 +312,176 @@ with tab_s5:
         st.success("**3. Clasificación Supervisada (Naive Bayes):**\n`RIESGO_REORDEN`")
 
 
-# 6. SEMANA 8: RECONOCIMIENTO DE REPUESTOS (RED NEURONAL & SQLITE)
+# 6. SEMANA 7: REPRESENTACIONES DEL RECONOCIMIENTO (NUMÉRICA, SIMBÓLICA Y AFD)
+
+with tab_s7:
+    st.header("Semana 7: Representaciones del Reconocimiento")
+    st.markdown("Implementación y comparación interactiva de las tres representaciones clásicas de la IA: **Numérica (Espacio Vectorial)**, **Simbólica (Reglas de Negocio)** y **Sintáctica (Autómata Finito Determinista)**.")
+
+    sub_num, sub_simb, sub_afd, sub_comp = st.tabs([
+        "🔢 1. Representación Numérica",
+        "🧠 2. Representación Simbólica",
+        "🔄 3. Autómata Finito (AFD)",
+        "📋 4. Tabla Comparativa"
+    ])
+
+    # --- 1. REPRESENTACIÓN NUMÉRICA ---
+    with sub_num:
+        st.subheader("Representación Vectorial y Distancia Euclidiana")
+        st.markdown("Cada repuesto se modela matemáticamente como un vector cuantitativo $\\vec{x} = [\\text{Stock Actual}, \\text{Días sin Rotación}]$.")
+
+        col_num_ctrl, col_num_plot = st.columns([1, 1.4])
+
+        with col_num_ctrl:
+            st.markdown("#### Configurar Pieza a Evaluar")
+            s7_stock = st.slider("Nivel de Stock de la pieza (unidades):", 0, 60, 4, key="s7_stock")
+            s7_dias = st.slider("Días sin rotación en taller:", 0, 60, 28, key="s7_dias")
+
+            vec_ref = [2.0, 35.0]  # Pieza crítica de referencia
+            vec_user = [float(s7_stock), float(s7_dias)]
+            dist_user = math.sqrt((vec_ref[0] - vec_user[0])**2 + (vec_ref[1] - vec_user[1])**2)
+
+            st.markdown("---")
+            st.markdown(f"**Vector de Referencia Crítica:** `[Stock: 2, Días: 35]`")
+            st.markdown(f"**Vector de Pieza Actual:** `[Stock: {s7_stock}, Días: {s7_dias}]`")
+            st.metric("Distancia Euclidiana $d$", f"{dist_user:.2f}")
+
+            if dist_user < 12.0:
+                st.error("🚨 **Alerta Crítica:** Alta similitud con estado crítico (stock agotándose y alta inmovilización). Requiere pedido inmediato.")
+            elif dist_user < 25.0:
+                st.warning("⚠️ **Alerta Moderada:** Proximidad intermedia al riesgo. Monitorear rotación semanal.")
+            else:
+                st.success("✅ **Inventario Saludable:** Gran distancia euclidiana respecto al estado crítico.")
+
+        with col_num_plot:
+            st.markdown("#### Espacio Vectorial 2D de Repuestos")
+            fig_vec, ax_vec = plt.subplots(figsize=(6, 4.5))
+            fig_vec.patch.set_facecolor('#0f172a')
+            ax_vec.set_facecolor('#1e293b')
+
+            # Puntos conocidos
+            p_ref = [2.0, 35.0]
+            p_p1 = [1.0, 40.0]
+            p_p2 = [45.0, 2.0]
+
+            ax_vec.scatter([p_ref[0]], [p_ref[1]], color='#ef4444', s=160, marker='X', label='Referencia Crítica [2, 35]', zorder=5)
+            ax_vec.scatter([p_p1[0]], [p_p1[1]], color='#f59e0b', s=100, label=f'Pieza 1 (Crítica) [1, 40] (d={math.sqrt((p_ref[0]-p_p1[0])**2 + (p_ref[1]-p_p1[1])**2):.1f})', zorder=4)
+            ax_vec.scatter([p_p2[0]], [p_p2[1]], color='#10b981', s=100, label=f'Pieza 2 (Saludable) [45, 2] (d={math.sqrt((p_ref[0]-p_p2[0])**2 + (p_ref[1]-p_p2[1])**2):.1f})', zorder=4)
+            ax_vec.scatter([vec_user[0]], [vec_user[1]], color='#38bdf8', s=140, marker='o', label=f'Tu Pieza [{s7_stock}, {s7_dias}] (d={dist_user:.1f})', zorder=6)
+
+            # Línea conectora entre tu pieza y referencia
+            ax_vec.plot([p_ref[0], vec_user[0]], [p_ref[1], vec_user[1]], color='#38bdf8', linestyle='--', alpha=0.7)
+
+            ax_vec.set_xlabel("Nivel de Stock (unidades)", color='#94a3b8', fontsize=9)
+            ax_vec.set_ylabel("Días sin Rotación (días)", color='#94a3b8', fontsize=9)
+            ax_vec.set_title("Proximidad Geométrica en Espacio de Características", color='#f8fafc', fontsize=10, fontweight='bold')
+            ax_vec.tick_params(colors='#94a3b8', labelsize=8)
+            ax_vec.legend(facecolor='#0f172a', edgecolor='#334155', labelcolor='#f8fafc', fontsize=8, loc='upper right')
+            for sp in ax_vec.spines.values():
+                sp.set_color('#334155')
+
+            plt.tight_layout()
+            st.pyplot(fig_vec)
+            plt.close(fig_vec)
+
+    # --- 2. REPRESENTACIÓN SIMBÓLICA ---
+    with sub_simb:
+        st.subheader("Motor de Reglas Lógicas de Negocio")
+        st.markdown("Deducción de decisiones operativas basada en hechos observables y reglas lógicas declarativas.")
+
+        col_s_ctrl, col_s_out = st.columns([1, 1.2])
+
+        with col_s_ctrl:
+            st.markdown("#### Hechos Operativos Observados")
+            stock_hecho = st.number_input("Stock actual en bodega:", min_value=0, max_value=100, value=1, step=1, key="s7_st_h")
+            dias_hecho = st.number_input("Días de inmovilización:", min_value=0, max_value=180, value=40, step=1, key="s7_di_h")
+            oxido_hecho = st.checkbox("¿Se evidencia óxido o deterioro físico?", value=False, key="s7_ox_h")
+
+        with col_s_out:
+            st.markdown("#### Evaluación de Premisas")
+            p1 = stock_hecho < 3
+            p2 = dias_hecho > 30
+            p3 = oxido_hecho
+
+            st.write(f"- Premisa 1: `Stock < 3` ➔ **{p1}** (Stock actual: {stock_hecho})")
+            st.write(f"- Premisa 2: `Días > 30` ➔ **{p2}** (Días actuales: {dias_hecho})")
+            st.write(f"- Premisa 3: `Oxidación == True` ➔ **{p3}**")
+
+            st.markdown("#### Regla de Negocio Aplicada:")
+            st.code("""IF stock < 3 OR dias_rotacion > 30 OR oxidacion == True:
+    THEN generar_orden_urgente_o_descarte()
+ELSE:
+    THEN mantener_monitoreo_estandar_erp()""", language="python")
+
+            if p1 or p2 or p3:
+                st.error("🚨 **DECISIÓN EXPERTA:** SI se detecta stock bajo o deterioro (oxidación/estancamiento) ➔ **ENTONCES generar orden de compra urgente o activar protocolo de descarte.**")
+            else:
+                st.success("✅ **DECISIÓN EXPERTA:** SI el inventario es óptimo ➔ **ENTONCES mantener monitoreo estándar en ERP.**")
+
+    # --- 3. AUTÓMATA FINITO DETERMINISTA (AFD) ---
+    with sub_afd:
+        st.subheader("Autómata Finito Determinista para Validación de Códigos")
+        st.markdown("""
+        Validador sintáctico formal para códigos alfanuméricos de inventario de repuestos.
+        - **Lenguaje aceptado:** La secuencia exacta `'MOT'` seguida de un dígito numérico `[0-9]` (ej. `MOT1`, `MOT5`, `MOT9`).
+        - **Alfabeto:** $\\Sigma = \\{'M', 'O', 'T', '0', '1', ..., '9'\\}$
+        - **Estados:** $Q = \\{S_0, S_1, S_2, S_3, S_4\\}$ | **Inicial:** $S_0$ | **Aceptación:** $S_4$
+        """)
+
+        # Botones de prueba rápida
+        col_b1, col_b2, col_b3, col_b4, col_b5 = st.columns(5)
+        codigo_sugerido = "MOT5"
+        if col_b1.button("Probar 'MOT5'"): codigo_sugerido = "MOT5"
+        if col_b2.button("Probar 'MOT9'"): codigo_sugerido = "MOT9"
+        if col_b3.button("Probar 'MOTO'"): codigo_sugerido = "MOTO"
+        if col_b4.button("Probar 'CAR1'"): codigo_sugerido = "CAR1"
+        if col_b5.button("Probar 'MOT12'"): codigo_sugerido = "MOT12"
+
+        codigo_eval = st.text_input("Código de repuesto a validar:", value=codigo_sugerido, key="s7_cod_input")
+
+        # Simulación del autómata
+        estado_actual = "S0"
+        traza = [{"Paso": 0, "Carácter": "INICIO", "Estado Origen": "-", "Estado Destino": "S0", "Válido": True}]
+        valido = True
+
+        for idx, char in enumerate(codigo_eval, start=1):
+            estado_previo = estado_actual
+            if estado_actual == "S0" and char == 'M':
+                estado_actual = "S1"
+            elif estado_actual == "S1" and char == 'O':
+                estado_actual = "S2"
+            elif estado_actual == "S2" and char == 'T':
+                estado_actual = "S3"
+            elif estado_actual == "S3" and char.isdigit():
+                estado_actual = "S4"
+            else:
+                estado_actual = "MUERTO"
+                valido = False
+                traza.append({"Paso": idx, "Carácter": char, "Estado Origen": estado_previo, "Estado Destino": "ERROR (Rechazado)", "Válido": False})
+                break
+            traza.append({"Paso": idx, "Carácter": char, "Estado Origen": estado_previo, "Estado Destino": estado_actual, "Válido": True})
+
+        if valido and estado_actual == "S4":
+            st.success(f"🎉 **CÓDIGO ACEPTADO:** La secuencia `{codigo_eval}` culminó en el estado de aceptación **S4**.")
+        else:
+            st.error(f"❌ **CÓDIGO RECHAZADO:** La secuencia `{codigo_eval}` no cumple la gramática del autómata formal.")
+
+        st.markdown("**Traza de Transiciones en el Autómata:**")
+        st.dataframe(traza, use_container_width=True)
+
+    # --- 4. TABLA COMPARATIVA ---
+    with sub_comp:
+        st.subheader("Comparativa Formal de Representaciones de IA")
+        st.markdown("""
+| Representación | Qué información utiliza | Qué puede reconocer | Ventajas | Limitaciones | Información que puede perderse |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Numérica** | Vectores cuantitativos (stock, días, costos). | Grados de similitud y proximidad matemática entre repuestos. | Permite cálculos precisos y clasificación estadística rápida. | Sensible a escalas y unidades heterogéneas. | Contexto cualitativo o descripciones en lenguaje natural. |
+| **Simbólica** | Hechos discretos y reglas condicionales lógicas. | Causalidad y directivas normativas del negocio de autopartes. | Alta explicabilidad y alineación directa con expertos humanos. | Dificultad para manejar incertidumbre o datos masivos continuos. | Matices graduales o probabilidades continuas de fallo. |
+| **Autómata** | Secuencias formales de símbolos y alfabetos. | Patrones sintácticos exactos y códigos de control válidos. | Determinista, eficiente en tiempo de ejecución y verificable. | Rigidez absoluta ante variaciones o errores tipográficos. | Estructuras semánticas o relaciones contextuales amplias. |
+        """)
+
+
+# 7. SEMANA 8: RECONOCIMIENTO DE REPUESTOS (RED NEURONAL & SQLITE)
 
 with tab_s8:
     st.header("Semana 8: Representaciones del Reconocimiento")
@@ -344,7 +518,7 @@ with tab_s8:
         """)
 
 
-# 7. SEMANA 9: VISIÓN COMPUTACIONAL (BORDES CANNY, OTSU & REGIONES CONEXAS)
+# 8. SEMANA 9: VISIÓN COMPUTACIONAL (BORDES CANNY, OTSU & REGIONES CONEXAS)
 
 with tab_s9:
     st.header("Semana 9: Reconocimiento de Imágenes - Contornos, Otsu y Regiones Conectadas")
