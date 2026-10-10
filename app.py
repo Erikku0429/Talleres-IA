@@ -11,9 +11,10 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from skimage.color import rgb2gray
-from skimage.feature import canny
+from skimage.feature import canny, local_binary_pattern
 from skimage.filters import threshold_otsu
-from skimage.measure import label, regionprops
+import scipy.ndimage as ndi
+from skimage.measure import regionprops
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
@@ -72,7 +73,7 @@ st.markdown("Plataforma avanzada para la gestión automatizada de inventario de 
 
 # NAVEGACIÓN POR PESTAÑAS (MODULAR)
 
-tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s7, tab_s8, tab_s9 = st.tabs([
+tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s7, tab_s8, tab_s9, tab_s10 = st.tabs([
     "📊 Resumen Ejecutivo",
     "🤖 Semana 2: Línea Base",
     "🔍 Semana 3: Taxonomía",
@@ -80,14 +81,15 @@ tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s7, tab_s8, tab_s9 = st.tabs([
     "⚡ Semana 5: Sistema Híbrido",
     "📐 Semana 7: Representaciones",
     "👁️ Semana 8: Reconocimiento IA",
-    "🔬 Semana 9: Visión Computacional"
+    "🔬 Semana 9: Visión Computacional",
+    "🧩 Semana 10: Texturas LBP"
 ])
 
 # 1. RESUMEN EJECUTIVO
 
 with tab_resumen:
     st.header("Arquitectura Semestral del Proyecto")
-    col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+    col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
     with col1:
         st.markdown('<div class="metric-card"><h3>Semana 2</h3><p>94.7%</p><small>Accuracy Base</small></div>',
                     unsafe_allow_html=True)
@@ -112,6 +114,10 @@ with tab_resumen:
     with col7:
         st.markdown(
             '<div class="metric-card"><h3>Semana 9</h3><p>Canny + Otsu</p><small>23 Regiones</small></div>',
+            unsafe_allow_html=True)
+    with col8:
+        st.markdown(
+            '<div class="metric-card"><h3>Semana 10</h3><p>LBP + Otsu</p><small>Vector 49D (.npy)</small></div>',
             unsafe_allow_html=True)
 
 # 2. SEMANA 2: LÍNEA BASE (MACHINE LEARNING)
@@ -577,8 +583,7 @@ with tab_s9:
             pixeles_obj = int(np.sum(mask_sel))
             pct_obj = (pixeles_obj / img_gray.size) * 100.0
 
-            labels_sel = label(mask_sel)
-            total_regs = int(labels_sel.max())
+            labels_sel, total_regs = ndi.label(mask_sel, structure=np.ones((3, 3)))
             props_sel = sorted(regionprops(labels_sel), key=lambda r: r.area, reverse=True)
 
             # Métricas rápidas
@@ -661,6 +666,188 @@ with tab_s9:
 
         else:
             st.error(f"No se encontró el archivo de imagen en `{img_sel_path}`.")
+
+
+# 9. SEMANA 10: HISTOGRAMAS, REGIONES Y TEXTURAS LBP
+
+with tab_s10:
+    st.header("Semana 10: Histogramas, Regiones y Texturas LBP")
+    st.markdown("Segmentación por **Otsu**, medición y filtrado morfológico de **Regiones Conexas**, extracción de **Texturas LBP (Local Binary Pattern)** y combinación en un **Vector de 49 Dimensiones (`.npy`)**.")
+
+    col_s10_ctrl, col_s10_vista = st.columns([1, 2.3])
+
+    with col_s10_ctrl:
+        st.subheader("⚙️ Configuración del Análisis")
+        opciones_s10 = {
+            "Bujía (foto_bujia.jpg)": "images/foto_bujia.jpg",
+            "Llanta (foto_llanta.jpg)": "images/foto_llanta.jpg",
+            "Pistón (foto_piston.jpg)": "images/foto_piston.jpg",
+            "Manubrio (foto_manubrio.jpg)": "images/foto_manubrio.jpg"
+        }
+        sel_s10_nom = st.selectbox("Seleccione repuesto del taller:", list(opciones_s10.keys()), index=0, key="s10_img_sel")
+        img_s10_path = Path(opciones_s10[sel_s10_nom])
+
+        min_area_slider = st.slider("Filtro de Área Mínima de Región (px):", min_value=10, max_value=500, value=50, step=10,
+                                    help="Descarta componentes pequeños causados por ruido de fondo o micro-sombras.")
+
+        radio_lbp = st.selectbox("Radio LBP (R):", [1, 2, 3], index=0, help="Radio del vecindario circular alrededor del píxel central.")
+        puntos_lbp = 8 * radio_lbp
+
+        st.markdown("---")
+        st.markdown("### 📌 Fundamentos Teóricos")
+        st.caption("• **Otsu:** Maximiza la varianza inter-clase para separar el fondo blanco de piezas oscuras.")
+        st.caption("• **Filtro de Regiones:** Elimina ruido para aislar componentes funcionales reales.")
+        st.caption("• **LBP Uniforme:** Mide micro-textura y rugosidad local comparando el píxel con sus vecinos.")
+        st.caption("• **Vector 49D:** 7 características de región + 32 bins de intensidad + 10 bins LBP.")
+
+    with col_s10_vista:
+        if img_s10_path.exists():
+            img_bgr_s10 = cv2.imread(str(img_s10_path))
+            img_rgb_s10 = cv2.cvtColor(img_bgr_s10, cv2.COLOR_BGR2RGB)
+            img_gray_s10 = cv2.cvtColor(img_bgr_s10, cv2.COLOR_BGR2GRAY)
+
+            # 1. Histograma de intensidad
+            hist_int_s10, _ = np.histogram(img_gray_s10.ravel(), bins=32, range=(0, 256), density=True)
+
+            # 2. Otsu y máscara
+            t_otsu_s10 = int(threshold_otsu(img_gray_s10))
+            mask_s10 = img_gray_s10 < t_otsu_s10
+            pix_obj_s10 = int(np.sum(mask_s10))
+            pct_obj_s10 = (pix_obj_s10 / img_gray_s10.size) * 100.0
+
+            # 3. Componentes conexos (8-conectividad)
+            struct_8 = np.ones((3, 3), dtype=int)
+            lbl_s10, n_crudas_s10 = ndi.label(mask_s10, structure=struct_8)
+            props_s10 = regionprops(lbl_s10)
+            props_filt_s10 = [r for r in props_s10 if r.area >= min_area_slider]
+            n_filt_s10 = len(props_filt_s10)
+            areas_filt_s10 = [r.area for r in props_filt_s10] if props_filt_s10 else [0]
+            area_prom_s10 = float(np.mean(areas_filt_s10))
+            area_std_s10 = float(np.std(areas_filt_s10))
+
+            # 4. LBP
+            lbp_s10 = local_binary_pattern(img_gray_s10, P=8, R=radio_lbp, method='uniform')
+            n_bins_lbp_s10 = 10
+            hist_lbp_s10, _ = np.histogram(lbp_s10.ravel(), bins=n_bins_lbp_s10, range=(0, n_bins_lbp_s10), density=True)
+
+            # 5. Vector 49D
+            feats_reg_s10 = np.array([
+                float(n_crudas_s10),
+                float(n_filt_s10),
+                area_prom_s10,
+                area_std_s10,
+                float(np.sum(areas_filt_s10)),
+                pix_obj_s10 / img_gray_s10.size,
+                float(t_otsu_s10)
+            ])
+            vector_49d = np.concatenate([feats_reg_s10, hist_int_s10, hist_lbp_s10])
+
+            # Métricas rápidas
+            m1, m2, m3, m4 = st.columns(4)
+            with m1:
+                st.metric("Umbral Otsu", f"T={t_otsu_s10}", f"Luminancia [0-255]")
+            with m2:
+                st.metric("Regiones Filtradas", f"{n_filt_s10}", f"De {n_crudas_s10} crudas")
+            with m3:
+                st.metric("Área de Repuesto", f"{pct_obj_s10:.1f}%", f"{pix_obj_s10:,} px")
+            with m4:
+                st.metric("LBP Bin 8 (Homogéneo)", f"{hist_lbp_s10[8]*100:.1f}%", "Superficie plana")
+
+            # Sub-pestañas
+            tab_s10_live, tab_s10_panel, tab_s10_vector, tab_s10_comp = st.tabs([
+                "🖼️ Procesamiento en Tiempo Real",
+                "📊 Artefacto Oficial (artifacts/semana10_histograma.png)",
+                "🔢 Vector de Características 49D (.npy)",
+                "📋 Comparación de Texturas en Taller"
+            ])
+
+            with tab_s10_live:
+                fig_s10, axs_s10 = plt.subplots(1, 5, figsize=(18, 3.8))
+                fig_s10.patch.set_facecolor('#0f172a')
+                for ax in axs_s10:
+                    ax.tick_params(colors='#94a3b8', labelsize=7)
+                    for sp in ax.spines.values(): sp.set_color('#334155')
+
+                # 1. Original
+                axs_s10[0].imshow(img_rgb_s10)
+                axs_s10[0].set_title(f"1. Original RGB", color='#f8fafc', fontsize=9, fontweight='bold')
+
+                # 2. Histograma Intensidad
+                axs_s10[1].set_facecolor('#1e293b')
+                bins_x_s10 = np.linspace(0, 255, 32)
+                axs_s10[1].bar(bins_x_s10, hist_int_s10, width=6.0, color='#38bdf8', alpha=0.85, edgecolor='#0284c7')
+                axs_s10[1].axvline(t_otsu_s10, color='#ef4444', linestyle='--', linewidth=1.8)
+                axs_s10[1].set_title(f"2. Histograma (T={t_otsu_s10})", color='#f8fafc', fontsize=9, fontweight='bold')
+
+                # 3. Máscara y Bounding Boxes
+                axs_s10[2].imshow(mask_s10, cmap='gray')
+                for r in props_filt_s10:
+                    minr, minc, maxr, maxc = r.bbox
+                    rect = patches.Rectangle((minc, minr), maxc - minc, maxr - minr,
+                                             fill=False, edgecolor='#10b981', linewidth=1.5)
+                    axs_s10[2].add_patch(rect)
+                axs_s10[2].set_title(f"3. Regiones (≥{min_area_slider}px: {n_filt_s10})", color='#f8fafc', fontsize=9, fontweight='bold')
+
+                # 4. Mapa LBP
+                axs_s10[3].imshow(lbp_s10, cmap='magma')
+                axs_s10[3].set_title(f"4. Mapa LBP (R={radio_lbp})", color='#f8fafc', fontsize=9, fontweight='bold')
+
+                # 5. Histograma LBP
+                axs_s10[4].set_facecolor('#1e293b')
+                lbp_x = np.arange(10)
+                axs_s10[4].bar(lbp_x, hist_lbp_s10, color=['#f59e0b']*8 + ['#10b981', '#a855f7'], alpha=0.9)
+                axs_s10[4].set_title(f"5. LBP Hist (Bin 8: {hist_lbp_s10[8]*100:.1f}%)", color='#f8fafc', fontsize=9, fontweight='bold')
+                axs_s10[4].set_xticks(lbp_x)
+
+                plt.tight_layout()
+                st.pyplot(fig_s10)
+                plt.close(fig_s10)
+
+            with tab_s10_panel:
+                art_s10_path = Path("artifacts/semana10_histograma.png")
+                if art_s10_path.exists():
+                    st.image(str(art_s10_path), caption="Figura oficial de 15 paneles (Bujía vs Llanta vs Pistón)")
+                else:
+                    st.info("Ejecute `python src/semana10_texturas.py` para generar el artefacto oficial.")
+
+            with tab_s10_vector:
+                st.markdown("#### Desglose del Vector de Características (Longitud: 49 Dimensiones)")
+                col_v1, col_v2, col_v3 = st.columns(3)
+                with col_v1:
+                    st.markdown("**1. Descriptores de Región (7 valores):**")
+                    st.json({
+                        "Regiones Crudas": int(feats_reg_s10[0]),
+                        "Regiones Filtradas": int(feats_reg_s10[1]),
+                        "Área Promedio (px)": round(feats_reg_s10[2], 1),
+                        "Desv. Estándar Área (px)": round(feats_reg_s10[3], 1),
+                        "Área Total Objeto (px)": int(feats_reg_s10[4]),
+                        "Cobertura Lienzo (%)": round(feats_reg_s10[5]*100, 2),
+                        "Umbral Otsu": int(feats_reg_s10[6])
+                    })
+                with col_v2:
+                    st.markdown("**2. Histograma de Intensidad (32 bins):**")
+                    st.caption("Frecuencia probabilística normalizada de gris [0, 255].")
+                    st.dataframe([{"Bin": f"Gris {i*8}-{(i+1)*8-1}", "Valor": f"{hist_int_s10[i]:.4f}"} for i in range(10)], height=220)
+                with col_v3:
+                    st.markdown("**3. Histograma LBP (10 bins):**")
+                    st.caption("Distribución de micro-textura uniforme y rugosidad.")
+                    desc_lbp = ["Borde 0", "Borde 1", "Borde 2", "Borde 3", "Borde 4", "Borde 5", "Borde 6", "Borde 7", "Homogéneo/Plano", "No Uniforme (Caótico)"]
+                    st.dataframe([{"Patrón": desc_lbp[i], "Frecuencia": f"{hist_lbp_s10[i]*100:.2f}%"} for i in range(10)], height=220)
+
+                npy_path = Path("artifacts/semana10_features.npy")
+                if npy_path.exists():
+                    st.success(f"Archivo binario sincronizado: `{npy_path}` (Shape: {np.load(str(npy_path)).shape})")
+
+            with tab_s10_comp:
+                st.markdown("""
+                | Repuesto de Taller | Material Dominante | Umbral Otsu | Regiones Filtradas | % Homogéneo LBP (Bin 8) | % Rugosidad LBP (Bin 9) |
+                | :--- | :--- | :---: | :---: | :---: | :---: |
+                | **Bujía de Encendido** | Acero mecanizado + Cerámica lisa | **191** | **2** (Cuerpo + Terminal) | **86.49%** (Muy lisa) | **1.71%** (Baja rugosidad) |
+                | **Llanta de Motocicleta** | Caucho vulcanizado + Grabado tracción | **157** | **1** (Toroide continuo) | **55.93%** (Textura rica) | **7.57%** (Alta rugosidad) |
+                | **Pistón de Motor** | Aleación de aluminio torneado | **183** | **4** (Cilindro + Anillos + Bulón) | **50.06%** (Sombreado medio) | **5.74%** (Rugosidad media) |
+                """)
+        else:
+            st.error(f"No se encontró la imagen en `{img_s10_path}`.")
 
 
 # PIE DE PÁGINA

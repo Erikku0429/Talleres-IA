@@ -19,7 +19,8 @@ import cv2
 from skimage.color import rgb2gray
 from skimage.feature import canny
 from skimage.filters import threshold_otsu
-from skimage.measure import label, regionprops
+import scipy.ndimage as ndi
+from skimage.measure import regionprops
 
 # --- CONFIGURACIÓN DE RUTAS ---
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -123,8 +124,7 @@ def analizar_regiones(mascara_binaria):
     Etiqueta componentes conexos y extrae propiedades morfológicas
     de cada región detectada.
     """
-    etiquetas = label(mascara_binaria)
-    num_regiones = int(etiquetas.max())
+    etiquetas, num_regiones = ndi.label(mascara_binaria, structure=np.ones((3, 3)))
     props = regionprops(etiquetas)
     
     # Ordenar regiones por área descendente
@@ -133,6 +133,22 @@ def analizar_regiones(mascara_binaria):
     resumen_regiones = []
     for idx, reg in enumerate(props_ordenadas, start=1):
         minr, minc, maxr, maxc = reg.bbox
+        # Cálculo robusto de solidez (evita que AppLocker bloquee skimage.morphology._max_tree)
+        try:
+            sol_val = round(float(reg.solidity), 3)
+        except (ImportError, Exception):
+            try:
+                coords = reg.coords
+                if len(coords) >= 3:
+                    pts = np.ascontiguousarray(coords[:, [1, 0]], dtype=np.int32)
+                    hull = cv2.convexHull(pts)
+                    hull_area = cv2.contourArea(hull)
+                    sol_val = round(float(reg.area / hull_area), 3) if hull_area > 0 else 1.0
+                else:
+                    sol_val = 1.0
+            except Exception:
+                sol_val = 1.0
+
         resumen_regiones.append({
             "ranking": idx,
             "label_id": reg.label,
@@ -140,7 +156,7 @@ def analizar_regiones(mascara_binaria):
             "bbox": (int(minr), int(minc), int(maxr), int(maxc)),
             "centroide": (round(float(reg.centroid[0]), 1), round(float(reg.centroid[1]), 1)),
             "eccentricity": round(float(reg.eccentricity), 3) if hasattr(reg, 'eccentricity') else 0.0,
-            "solidity": round(float(reg.solidity), 3) if hasattr(reg, 'solidity') else 0.0
+            "solidity": sol_val
         })
         
     return {
