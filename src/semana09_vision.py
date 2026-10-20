@@ -398,11 +398,13 @@ def main():
     
     asegurar_entorno()
     
-    # Carga de la imagen del proyecto
-    print(f"\n[1] Cargando imagen del proyecto: {IMAGE_PATH}")
-    img_bgr = cv2.imread(str(IMAGE_PATH))
+    # Carga de la imagen del proyecto (permite pasar cualquier imagen por argumento: python semana09_vision.py [ruta])
+    import sys
+    ruta_objetivo = Path(sys.argv[1]) if len(sys.argv) > 1 and Path(sys.argv[1]).exists() else IMAGE_PATH
+    print(f"\n[1] Cargando imagen del proyecto: {ruta_objetivo}")
+    img_bgr = cv2.imread(str(ruta_objetivo))
     if img_bgr is None:
-        raise ValueError(f"No fue posible leer la imagen desde {IMAGE_PATH}")
+        raise ValueError(f"No fue posible leer la imagen desde {ruta_objetivo}")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     img_gray = rgb2gray(img_rgb)
     

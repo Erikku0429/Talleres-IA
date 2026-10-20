@@ -20,6 +20,66 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix
+import json
+
+def formatear_nombre_imagen(ruta):
+    """Genera un nombre legible y descriptivo con emojis para cualquier archivo de imagen."""
+    p = Path(ruta)
+    stem = p.stem.lower()
+    if "quemada" in stem:
+        return f"🔥 Bujía Quemada ({p.name})"
+    elif "rota" in stem:
+        return f"💥 Bujía Rota ({p.name})"
+    elif "bujia" in stem or stem.startswith("bug"):
+        num = "".join(filter(str.isdigit, stem))
+        sufijo = f" #{num}" if num else " Estándar"
+        return f"⚡ Bujía{sufijo} ({p.name})"
+    elif "piston" in stem or stem.startswith("pist"):
+        num = "".join(filter(str.isdigit, stem))
+        sufijo = f" #{num}" if num else " Estándar"
+        return f"⚙️ Pistón{sufijo} ({p.name})"
+    elif "llanta" in stem or "rueda" in stem:
+        num = "".join(filter(str.isdigit, stem))
+        sufijo = f" #{num}" if num else " Estándar"
+        return f"🛞 Llanta / Rueda{sufijo} ({p.name})"
+    elif "cha" in stem or "chasis" in stem:
+        num = "".join(filter(str.isdigit, stem))
+        sufijo = f" #{num}" if num else ""
+        return f"⛓️ Chasis / Cadena{sufijo} ({p.name})"
+    elif "silla" in stem or "asiento" in stem:
+        num = "".join(filter(str.isdigit, stem))
+        sufijo = f" #{num}" if num else ""
+        return f"🪑 Sillín / Asiento{sufijo} ({p.name})"
+    elif "susp" in stem:
+        num = "".join(filter(str.isdigit, stem))
+        sufijo = f" #{num}" if num else ""
+        return f"🔩 Suspensión{sufijo} ({p.name})"
+    elif "manubrio" in stem:
+        return f"🏍️ Manubrio ({p.name})"
+    else:
+        limpio = p.stem.replace("_", " ").title()
+        return f"📦 {limpio} ({p.name})"
+
+def obtener_catalogo_imagenes():
+    """
+    Escanea dinámicamente 'images/' y 'data/' para detectar automáticamente
+    todas las imágenes disponibles (.jpg, .jpeg, .png, .bmp, .webp, .tiff).
+    Permite colocar nuevas imágenes sin tocar una sola línea de código.
+    """
+    extensiones = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tif", ".tiff"}
+    catalogo = {}
+    p_data = Path("data/imagen_proyecto.png")
+    if p_data.exists():
+        catalogo["⭐ Bujía Proyecto (data/imagen_proyecto.png)"] = str(p_data)
+    p_imgs = Path("images")
+    if p_imgs.exists():
+        archivos = sorted([f for f in p_imgs.iterdir() if f.is_file() and f.suffix.lower() in extensiones])
+        for arch in archivos:
+            label = formatear_nombre_imagen(arch)
+            if label in catalogo:
+                label = f"{label} [{arch.name}]"
+            catalogo[label] = str(arch)
+    return catalogo
 
 # CONFIGURACIÓN DE PÁGINA Y ESTILOS UI/UX
 st.set_page_config(
@@ -538,14 +598,31 @@ with tab_s9:
 
     with col_ctrl:
         st.subheader("⚙️ Configuración del Pipeline")
-        opciones_img = {
-            "Bujía (data/imagen_proyecto.png)": str(ruta_img_defecto),
-            "Pistón (images/foto_piston.jpg)": "images/foto_piston.jpg",
-            "Llanta (images/foto_llanta.jpg)": "images/foto_llanta.jpg",
-            "Manubrio (images/foto_manubrio.jpg)": "images/foto_manubrio.jpg"
-        }
-        sel_nombre = st.selectbox("Seleccione imagen del taller:", list(opciones_img.keys()), index=0)
-        img_sel_path = Path(opciones_img[sel_nombre])
+        catalogo_s9 = obtener_catalogo_imagenes()
+        modo_carga_s9 = st.radio("Fuente de la imagen:", ["📂 Catálogo del Taller", "📤 Subir Imagen Nueva"], horizontal=True, key="s9_modo")
+        
+        if modo_carga_s9 == "📂 Catálogo del Taller":
+            sel_nombre = st.selectbox(
+                f"Seleccione imagen del taller ({len(catalogo_s9)} detectadas dinámicamente):",
+                list(catalogo_s9.keys()),
+                index=0,
+                key="s9_sel"
+            )
+            img_sel_path = Path(catalogo_s9[sel_nombre])
+            img_bgr = cv2.imread(str(img_sel_path))
+            nombre_mostrar = sel_nombre
+        else:
+            archivo_subido = st.file_uploader("Suba una imagen (.jpg, .png, etc.):", type=["jpg", "jpeg", "png", "webp", "bmp"], key="s9_subir")
+            if archivo_subido is not None:
+                bytes_data = archivo_subido.read()
+                nparr = np.frombuffer(bytes_data, np.uint8)
+                img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                img_sel_path = Path(archivo_subido.name)
+                nombre_mostrar = f"Subida: {archivo_subido.name}"
+            else:
+                img_sel_path = Path(list(catalogo_s9.values())[0])
+                img_bgr = cv2.imread(str(img_sel_path))
+                nombre_mostrar = list(catalogo_s9.keys())[0]
 
         sigma_val = st.slider("Parámetro Sigma de Canny (σ):", min_value=0.5, max_value=4.0, value=2.0, step=0.5,
                               help="Controla la dispersión del filtro Gaussiano antes de derivar gradientes.")
@@ -562,9 +639,9 @@ with tab_s9:
         st.caption("• **Regiones:** Agrupación por vecindad conexa de 8 vecinos sobre la máscara binaria.")
 
     with col_vista:
-        if img_sel_path.exists():
+        if img_bgr is not None:
+            st.caption(f"Visualizando: **{nombre_mostrar}**")
             # Cargar imagen y procesar
-            img_bgr = cv2.imread(str(img_sel_path))
             img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
             img_gray = rgb2gray(img_rgb)
             img_gray_u8 = (img_gray * 255).astype(np.uint8)
@@ -678,14 +755,31 @@ with tab_s10:
 
     with col_s10_ctrl:
         st.subheader("⚙️ Configuración del Análisis")
-        opciones_s10 = {
-            "Bujía (foto_bujia.jpg)": "images/foto_bujia.jpg",
-            "Llanta (foto_llanta.jpg)": "images/foto_llanta.jpg",
-            "Pistón (foto_piston.jpg)": "images/foto_piston.jpg",
-            "Manubrio (foto_manubrio.jpg)": "images/foto_manubrio.jpg"
-        }
-        sel_s10_nom = st.selectbox("Seleccione repuesto del taller:", list(opciones_s10.keys()), index=0, key="s10_img_sel")
-        img_s10_path = Path(opciones_s10[sel_s10_nom])
+        catalogo_s10 = obtener_catalogo_imagenes()
+        modo_carga_s10 = st.radio("Fuente de imagen:", ["📂 Catálogo del Taller", "📤 Subir Imagen Nueva"], horizontal=True, key="s10_modo")
+
+        if modo_carga_s10 == "📂 Catálogo del Taller":
+            sel_s10_nom = st.selectbox(
+                f"Seleccione repuesto ({len(catalogo_s10)} detectados dinámicamente):",
+                list(catalogo_s10.keys()),
+                index=0,
+                key="s10_img_sel"
+            )
+            img_s10_path = Path(catalogo_s10[sel_s10_nom])
+            img_bgr_s10 = cv2.imread(str(img_s10_path))
+            nombre_s10_mostrar = sel_s10_nom
+        else:
+            archivo_subido_s10 = st.file_uploader("Suba un repuesto (.jpg, .png, etc.):", type=["jpg", "jpeg", "png", "webp", "bmp"], key="s10_subir")
+            if archivo_subido_s10 is not None:
+                bytes_data = archivo_subido_s10.read()
+                nparr = np.frombuffer(bytes_data, np.uint8)
+                img_bgr_s10 = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                img_s10_path = Path(archivo_subido_s10.name)
+                nombre_s10_mostrar = f"Subida: {archivo_subido_s10.name}"
+            else:
+                img_s10_path = Path(list(catalogo_s10.values())[0])
+                img_bgr_s10 = cv2.imread(str(img_s10_path))
+                nombre_s10_mostrar = list(catalogo_s10.keys())[0]
 
         min_area_slider = st.slider("Filtro de Área Mínima de Región (px):", min_value=10, max_value=500, value=50, step=10,
                                     help="Descarta componentes pequeños causados por ruido de fondo o micro-sombras.")
@@ -701,8 +795,8 @@ with tab_s10:
         st.caption("• **Vector 49D:** 7 características de región + 32 bins de intensidad + 10 bins LBP.")
 
     with col_s10_vista:
-        if img_s10_path.exists():
-            img_bgr_s10 = cv2.imread(str(img_s10_path))
+        if img_bgr_s10 is not None:
+            st.caption(f"Repuesto Seleccionado: **{nombre_s10_mostrar}**")
             img_rgb_s10 = cv2.cvtColor(img_bgr_s10, cv2.COLOR_BGR2RGB)
             img_gray_s10 = cv2.cvtColor(img_bgr_s10, cv2.COLOR_BGR2GRAY)
 
@@ -751,14 +845,14 @@ with tab_s10:
             with m3:
                 st.metric("Área de Repuesto", f"{pct_obj_s10:.1f}%", f"{pix_obj_s10:,} px")
             with m4:
-                st.metric("LBP Bin 8 (Homogéneo)", f"{hist_lbp_s10[8]*100:.1f}%", "Superficie plana")
+                st.metric("LBP Bin 8 (Homogéneo)", f"{hist_lbp_s10[8]*100:.1f}%", f"Rugosidad (B9): {hist_lbp_s10[9]*100:.1f}%")
 
             # Sub-pestañas
             tab_s10_live, tab_s10_panel, tab_s10_vector, tab_s10_comp = st.tabs([
                 "🖼️ Procesamiento en Tiempo Real",
                 "📊 Artefacto Oficial (artifacts/semana10_histograma.png)",
                 "🔢 Vector de Características 49D (.npy)",
-                "📋 Comparación de Texturas en Taller"
+                "🔍 Comparador Lado a Lado (Limpia vs Quemada)"
             ])
 
             with tab_s10_live:
@@ -770,14 +864,15 @@ with tab_s10:
 
                 # 1. Original
                 axs_s10[0].imshow(img_rgb_s10)
-                axs_s10[0].set_title(f"1. Original RGB", color='#f8fafc', fontsize=9, fontweight='bold')
+                axs_s10[0].set_title(f"1. Original RGB\n{img_gray_s10.shape[0]}x{img_gray_s10.shape[1]} px", color='#f8fafc', fontsize=9, fontweight='bold')
 
                 # 2. Histograma Intensidad
                 axs_s10[1].set_facecolor('#1e293b')
                 bins_x_s10 = np.linspace(0, 255, 32)
                 axs_s10[1].bar(bins_x_s10, hist_int_s10, width=6.0, color='#38bdf8', alpha=0.85, edgecolor='#0284c7')
-                axs_s10[1].axvline(t_otsu_s10, color='#ef4444', linestyle='--', linewidth=1.8)
+                axs_s10[1].axvline(t_otsu_s10, color='#ef4444', linestyle='--', linewidth=1.8, label=f"Otsu {t_otsu_s10}")
                 axs_s10[1].set_title(f"2. Histograma (T={t_otsu_s10})", color='#f8fafc', fontsize=9, fontweight='bold')
+                axs_s10[1].legend(facecolor='#0f172a', edgecolor='#334155', labelcolor='#f8fafc', fontsize=7)
 
                 # 3. Máscara y Bounding Boxes
                 axs_s10[2].imshow(mask_s10, cmap='gray')
@@ -796,7 +891,7 @@ with tab_s10:
                 axs_s10[4].set_facecolor('#1e293b')
                 lbp_x = np.arange(10)
                 axs_s10[4].bar(lbp_x, hist_lbp_s10, color=['#f59e0b']*8 + ['#10b981', '#a855f7'], alpha=0.9)
-                axs_s10[4].set_title(f"5. LBP Hist (Bin 8: {hist_lbp_s10[8]*100:.1f}%)", color='#f8fafc', fontsize=9, fontweight='bold')
+                axs_s10[4].set_title(f"5. LBP Hist (B8: {hist_lbp_s10[8]*100:.1f}%)", color='#f8fafc', fontsize=9, fontweight='bold')
                 axs_s10[4].set_xticks(lbp_x)
 
                 plt.tight_layout()
@@ -806,7 +901,7 @@ with tab_s10:
             with tab_s10_panel:
                 art_s10_path = Path("artifacts/semana10_histograma.png")
                 if art_s10_path.exists():
-                    st.image(str(art_s10_path), caption="Figura oficial de 15 paneles (Bujía vs Llanta vs Pistón)")
+                    st.image(str(art_s10_path), caption="Figura oficial multiclase con repuestos clave (Bujías, Llantas, Pistones, Chasis)")
                 else:
                     st.info("Ejecute `python src/semana10_texturas.py` para generar el artefacto oficial.")
 
@@ -835,16 +930,63 @@ with tab_s10:
                     st.dataframe([{"Patrón": desc_lbp[i], "Frecuencia": f"{hist_lbp_s10[i]*100:.2f}%"} for i in range(10)], height=220)
 
                 npy_path = Path("artifacts/semana10_features.npy")
+                meta_path = Path("artifacts/semana10_features_meta.json")
                 if npy_path.exists():
-                    st.success(f"Archivo binario sincronizado: `{npy_path}` (Shape: {np.load(str(npy_path)).shape})")
+                    arr_npy = np.load(str(npy_path))
+                    st.success(f"Archivo binario sincronizado: `{npy_path}` (Matriz Shape: **{arr_npy.shape}**)")
+                
+                if meta_path.exists():
+                    with open(meta_path, "r", encoding="utf-8") as f_m:
+                        meta_data = json.load(f_m)
+                    st.markdown(f"**Dataset Completo Procesado por Lotes ({len(meta_data)} repuestos):**")
+                    st.dataframe(meta_data, use_container_width=True, height=260)
 
             with tab_s10_comp:
+                st.markdown("### 🔍 Comparador Lado a Lado de Dos Repuestos en Tiempo Real")
+                st.caption("Seleccione dos repuestos para contrastar sus propiedades ópticas, umbrales y micro-textura LBP.")
+                
+                col_cmp_a, col_cmp_b = st.columns(2)
+                with col_cmp_a:
+                    st.markdown("#### 🔹 Pieza A (Referencia)")
+                    sel_a = st.selectbox("Seleccione Pieza A:", list(catalogo_s10.keys()), index=0, key="cmp_a")
+                    img_a_bgr = cv2.imread(catalogo_s10[sel_a])
+                    if img_a_bgr is not None:
+                        img_a_gray = cv2.cvtColor(img_a_bgr, cv2.COLOR_BGR2GRAY)
+                        t_a = int(threshold_otsu(img_a_gray))
+                        lbp_a = local_binary_pattern(img_a_gray, 8, 1, 'uniform')
+                        h_lbp_a, _ = np.histogram(lbp_a.ravel(), bins=10, range=(0, 10), density=True)
+                        st.image(cv2.cvtColor(img_a_bgr, cv2.COLOR_BGR2RGB), caption=f"{sel_a} (Otsu: {t_a})", use_container_width=True)
+                        st.metric("Otsu T*", f"{t_a}", f"LBP Plano (B8): {h_lbp_a[8]*100:.1f}%")
+                        st.metric("LBP Rugoso (B9)", f"{h_lbp_a[9]*100:.2f}%", f"Microbordes: {sum(h_lbp_a[:8])*100:.1f}%")
+                        
+                with col_cmp_b:
+                    st.markdown("#### 🔸 Pieza B (Comparación)")
+                    # Buscar por defecto foto_bujia_quemada si está disponible
+                    idx_def_b = 0
+                    for idx_k, k in enumerate(catalogo_s10.keys()):
+                        if "quemada" in k.lower():
+                            idx_def_b = idx_k
+                            break
+                    sel_b = st.selectbox("Seleccione Pieza B:", list(catalogo_s10.keys()), index=idx_def_b, key="cmp_b")
+                    img_b_bgr = cv2.imread(catalogo_s10[sel_b])
+                    if img_b_bgr is not None:
+                        img_b_gray = cv2.cvtColor(img_b_bgr, cv2.COLOR_BGR2GRAY)
+                        t_b = int(threshold_otsu(img_b_gray))
+                        lbp_b = local_binary_pattern(img_b_gray, 8, 1, 'uniform')
+                        h_lbp_b, _ = np.histogram(lbp_b.ravel(), bins=10, range=(0, 10), density=True)
+                        st.image(cv2.cvtColor(img_b_bgr, cv2.COLOR_BGR2RGB), caption=f"{sel_b} (Otsu: {t_b})", use_container_width=True)
+                        st.metric("Otsu T*", f"{t_b}", f"LBP Plano (B8): {h_lbp_b[8]*100:.1f}%")
+                        st.metric("LBP Rugoso (B9)", f"{h_lbp_b[9]*100:.2f}%", f"Microbordes: {sum(h_lbp_b[:8])*100:.1f}%")
+
+                st.markdown("---")
+                st.markdown("#### 📊 Tabla Síntesis de Referencia (Bujía Limpia vs Quemada vs Llanta vs Pistón)")
                 st.markdown("""
-                | Repuesto de Taller | Material Dominante | Umbral Otsu | Regiones Filtradas | % Homogéneo LBP (Bin 8) | % Rugosidad LBP (Bin 9) |
+                | Repuesto de Taller | Condición / Material | Umbral Otsu | Regiones Filtradas | % Homogéneo LBP (Bin 8) | % Rugosidad LBP (Bin 9) |
                 | :--- | :--- | :---: | :---: | :---: | :---: |
-                | **Bujía de Encendido** | Acero mecanizado + Cerámica lisa | **191** | **2** (Cuerpo + Terminal) | **86.49%** (Muy lisa) | **1.71%** (Baja rugosidad) |
-                | **Llanta de Motocicleta** | Caucho vulcanizado + Grabado tracción | **157** | **1** (Toroide continuo) | **55.93%** (Textura rica) | **7.57%** (Alta rugosidad) |
-                | **Pistón de Motor** | Aleación de aluminio torneado | **183** | **4** (Cilindro + Anillos + Bulón) | **50.06%** (Sombreado medio) | **5.74%** (Rugosidad media) |
+                | **⚡ Bujía Estándar** | Acero + Cerámica limpia | **191** | **2** (Cuerpo + Terminal) | **86.49%** (Superficie lisa) | **1.71%** (Mínima rugosidad) |
+                | **🔥 Bujía Quemada** | Carbonilla + Aceite quemado | **103** | **6** (Costras de carbón) | **29.85%** (Pierde homogeneidad) | **2.96%** (Rugosidad alta) |
+                | **🛞 Llanta de Moto** | Caucho vulcanizado + Labrado | **157** | **1** (Toroide continuo) | **55.93%** (Textura periódica) | **7.57%** (Máxima rugosidad) |
+                | **⚙️ Pistón de Motor** | Aluminio mecanizado | **183** | **4** (Cilindro + Anillos) | **50.06%** (Sombreado torneado) | **5.74%** (Rugosidad media) |
                 """)
         else:
             st.error(f"No se encontró la imagen en `{img_s10_path}`.")

@@ -117,17 +117,20 @@ hist_lbp, _ = np.histogram(lbp.ravel(), bins=10, range=(0, 10), density=True)
 #### 4. Vector de Características de 49 Dimensiones (`semana10_features.npy`):
 $$\mathbf{v} = \underbrace{[7 \text{ métricas de regiones}]}_{\text{Morfometría}} \cup \underbrace{[32 \text{ bins de intensidad}]}_{\text{Filtro fotométrico}} \cup \underbrace{[10 \text{ bins LBP}]}_{\text{Textura local}} = \mathbf{49\text{ dimensiones}}$$
 
-### 📈 Comparativa de Resultados del Taller:
-| Característica | Bujía (`foto_bujia.jpg`) | Neumático / Llanta (`foto_llanta.jpg`) | Pistón (`foto_piston.jpg`) |
-| :--- | :--- | :--- | :--- |
-| **Umbral Otsu ($T^*$)** | **191** | **157** | **183** |
-| **Cobertura en Imagen** | $6.82\%$ | $41.89\%$ | $30.26\%$ |
-| **Regiones Conexas** | 22 crudas $\to$ **2 filtradas** | 30 crudas $\to$ **1 filtrada** | 152 crudas $\to$ **4 filtradas** |
-| **Área Promedio** | $6,718\text{ px}$ | $128,466\text{ px}$ | $17,454\text{ px}$ |
-| **LBP Bin 8 (Liso)** | **86.49%** (Pulido) | **55.93%** (Rugoso) | **50.06%** (Mecanizado) |
-| **LBP Bins 0-7 (Microbordes)**| $6.84\%$ | **30.34%** ($4.4\times$ mayor) | $12.18\%$ |
+### 📈 Comparativa de Resultados del Taller (Incluyendo Bujía Quemada):
+| Característica | Bujía Limpia (`foto_bujia.jpg`) | 🔥 Bujía Quemada (`foto_bujia_quemada.jpg`) | 🛞 Llanta (`foto_llanta.jpg`) | ⚙️ Pistón (`foto_piston.jpg`) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Umbral Otsu ($T^*$)** | **191** | **103** (Mucho más oscura) | **157** | **183** |
+| **Cobertura en Imagen** | $6.82\%$ | **21.29%** (Hollín/carbonilla) | $41.89\%$ | $30.26\%$ |
+| **Regiones Conexas** | 22 crudas $\to$ **2 filtradas** | 77 crudas $\to$ **6 filtradas** (Costras de carbón) | 30 crudas $\to$ **1 filtrada** | 152 crudas $\to$ **4 filtradas** |
+| **Área Promedio** | $6,718\text{ px}$ | $10,879\text{ px}$ | $128,466\text{ px}$ | $17,454\text{ px}$ |
+| **LBP Bin 8 (Liso/Plano)** | **86.49%** (Pulido) | **29.85%** (Pierde homogeneidad) | **55.93%** (Rugoso) | **50.06%** (Mecanizado) |
+| **LBP Bins 0-7 (Microbordes)**| $6.84\%$ | **22.18%** (Costras y bordes) | **30.34%** ($4.4\times$ mayor) | $12.18\%$ |
+| **LBP Bin 9 (Rugosidad Caótica)**| $1.71\%$ | **2.96%** (Depósitos de carbón) | **7.57%** (Máxima rugosidad) | $5.74\%$ |
 
-> **Diferencia física clave:** La llanta presenta **4.4 veces más respuesta en los bins de microbordes de LBP** que la bujía debido al labrado profundo de la banda de rodadura y a la porosidad del caucho vulcanizado.
+> **Diferencia física y diagnóstico automático:**
+> * **Bujía Limpia vs. Quemada:** La bujía quemada experimenta un desplome en su umbral de Otsu ($T=103$ vs $191$) debido a los depósitos negros de combustión incompleta. Además, la homogeneidad LBP (Bin 8) cae del $86.49\%$ al $29.85\%$, multiplicando los micro-bordes y patrones no uniformes debido a las costras rugosas de carbón sobre el electrodo y la porcelana.
+> * **Descubrimiento Dinámico de Imágenes:** El código escanea automáticamente `images/` mediante `obtener_catalogo_imagenes()`, de modo que cualquier imagen nueva que se añada al directorio (o que se suba directamente por la interfaz web) es procesada en tiempo real sin modificar código.
 
 ---
 

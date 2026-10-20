@@ -1,0 +1,546 @@
+[
+  {
+    "id": 0,
+    "archivo": "imagen_proyecto.png",
+    "etiqueta": "Bujía del Proyecto (imagen_proyecto.png)",
+    "dimensiones": [
+      447,
+      447
+    ],
+    "umbral_otsu": 191,
+    "cobertura_objeto_pct": 6.82,
+    "regiones_crudas": 22,
+    "regiones_filtradas": 2,
+    "area_promedio_filtrada": 6718.0,
+    "lbp_bin8_homogeneo_pct": 86.49,
+    "lbp_bin9_rugosidad_pct": 1.71
+  },
+  {
+    "id": 1,
+    "archivo": "bug2.jpg",
+    "etiqueta": "Bujía #2 (bug2.jpg)",
+    "dimensiones": [
+      554,
+      554
+    ],
+    "umbral_otsu": 169,
+    "cobertura_objeto_pct": 14.3,
+    "regiones_crudas": 63,
+    "regiones_filtradas": 17,
+    "area_promedio_filtrada": 2572.5,
+    "lbp_bin8_homogeneo_pct": 74.51,
+    "lbp_bin9_rugosidad_pct": 2.81
+  },
+  {
+    "id": 2,
+    "archivo": "bug3.jpg",
+    "etiqueta": "Bujía #3 (bug3.jpg)",
+    "dimensiones": [
+      335,
+      597
+    ],
+    "umbral_otsu": 158,
+    "cobertura_objeto_pct": 16.85,
+    "regiones_crudas": 153,
+    "regiones_filtradas": 15,
+    "area_promedio_filtrada": 2201.0,
+    "lbp_bin8_homogeneo_pct": 62.29,
+    "lbp_bin9_rugosidad_pct": 5.82
+  },
+  {
+    "id": 3,
+    "archivo": "bug4.jpg",
+    "etiqueta": "Bujía #4 (bug4.jpg)",
+    "dimensiones": [
+      597,
+      514
+    ],
+    "umbral_otsu": 187,
+    "cobertura_objeto_pct": 9.92,
+    "regiones_crudas": 8,
+    "regiones_filtradas": 2,
+    "area_promedio_filtrada": 15217.0,
+    "lbp_bin8_homogeneo_pct": 83.79,
+    "lbp_bin9_rugosidad_pct": 1.42
+  },
+  {
+    "id": 4,
+    "archivo": "bug5.jpg",
+    "etiqueta": "Bujía #5 (bug5.jpg)",
+    "dimensiones": [
+      428,
+      716
+    ],
+    "umbral_otsu": 163,
+    "cobertura_objeto_pct": 20.88,
+    "regiones_crudas": 17,
+    "regiones_filtradas": 5,
+    "area_promedio_filtrada": 12788.8,
+    "lbp_bin8_homogeneo_pct": 70.42,
+    "lbp_bin9_rugosidad_pct": 2.32
+  },
+  {
+    "id": 5,
+    "archivo": "cha1.jpg",
+    "etiqueta": "Chasis / Cadena #1 (cha1.jpg)",
+    "dimensiones": [
+      414,
+      738
+    ],
+    "umbral_otsu": 146,
+    "cobertura_objeto_pct": 14.94,
+    "regiones_crudas": 9,
+    "regiones_filtradas": 6,
+    "area_promedio_filtrada": 7606.3,
+    "lbp_bin8_homogeneo_pct": 65.5,
+    "lbp_bin9_rugosidad_pct": 3.61
+  },
+  {
+    "id": 6,
+    "archivo": "cha2.jpg",
+    "etiqueta": "Chasis / Cadena #2 (cha2.jpg)",
+    "dimensiones": [
+      452,
+      678
+    ],
+    "umbral_otsu": 159,
+    "cobertura_objeto_pct": 28.35,
+    "regiones_crudas": 112,
+    "regiones_filtradas": 9,
+    "area_promedio_filtrada": 9593.7,
+    "lbp_bin8_homogeneo_pct": 52.64,
+    "lbp_bin9_rugosidad_pct": 5.33
+  },
+  {
+    "id": 7,
+    "archivo": "cha3.jpg",
+    "etiqueta": "Chasis / Cadena #3 (cha3.jpg)",
+    "dimensiones": [
+      449,
+      682
+    ],
+    "umbral_otsu": 163,
+    "cobertura_objeto_pct": 11.75,
+    "regiones_crudas": 46,
+    "regiones_filtradas": 4,
+    "area_promedio_filtrada": 8946.5,
+    "lbp_bin8_homogeneo_pct": 80.58,
+    "lbp_bin9_rugosidad_pct": 3.36
+  },
+  {
+    "id": 8,
+    "archivo": "cha4.jpg",
+    "etiqueta": "Chasis / Cadena #4 (cha4.jpg)",
+    "dimensiones": [
+      449,
+      682
+    ],
+    "umbral_otsu": 147,
+    "cobertura_objeto_pct": 14.15,
+    "regiones_crudas": 11,
+    "regiones_filtradas": 2,
+    "area_promedio_filtrada": 21660.0,
+    "lbp_bin8_homogeneo_pct": 76.47,
+    "lbp_bin9_rugosidad_pct": 3.17
+  },
+  {
+    "id": 9,
+    "archivo": "cha5.jpg",
+    "etiqueta": "Chasis / Cadena #5 (cha5.jpg)",
+    "dimensiones": [
+      479,
+      640
+    ],
+    "umbral_otsu": 60,
+    "cobertura_objeto_pct": 80.62,
+    "regiones_crudas": 232,
+    "regiones_filtradas": 34,
+    "area_promedio_filtrada": 7237.7,
+    "lbp_bin8_homogeneo_pct": 63.17,
+    "lbp_bin9_rugosidad_pct": 4.34
+  },
+  {
+    "id": 10,
+    "archivo": "foto_bujia.jpg",
+    "etiqueta": "Bujía Estándar (foto_bujia.jpg)",
+    "dimensiones": [
+      447,
+      447
+    ],
+    "umbral_otsu": 191,
+    "cobertura_objeto_pct": 6.82,
+    "regiones_crudas": 22,
+    "regiones_filtradas": 2,
+    "area_promedio_filtrada": 6718.0,
+    "lbp_bin8_homogeneo_pct": 86.49,
+    "lbp_bin9_rugosidad_pct": 1.71
+  },
+  {
+    "id": 11,
+    "archivo": "foto_bujia_quemada.jpg",
+    "etiqueta": "Bujía Quemada (foto_bujia_quemada.jpg)",
+    "dimensiones": [
+      451,
+      680
+    ],
+    "umbral_otsu": 103,
+    "cobertura_objeto_pct": 20.37,
+    "regiones_crudas": 72,
+    "regiones_filtradas": 6,
+    "area_promedio_filtrada": 10369.7,
+    "lbp_bin8_homogeneo_pct": 29.85,
+    "lbp_bin9_rugosidad_pct": 2.96
+  },
+  {
+    "id": 12,
+    "archivo": "foto_llanta.jpg",
+    "etiqueta": "Llanta / Rueda Estándar (foto_llanta.jpg)",
+    "dimensiones": [
+      554,
+      554
+    ],
+    "umbral_otsu": 157,
+    "cobertura_objeto_pct": 41.89,
+    "regiones_crudas": 30,
+    "regiones_filtradas": 1,
+    "area_promedio_filtrada": 128466.0,
+    "lbp_bin8_homogeneo_pct": 55.93,
+    "lbp_bin9_rugosidad_pct": 7.57
+  },
+  {
+    "id": 13,
+    "archivo": "foto_manubrio.jpg",
+    "etiqueta": "Manubrio (foto_manubrio.jpg)",
+    "dimensiones": [
+      447,
+      447
+    ],
+    "umbral_otsu": 156,
+    "cobertura_objeto_pct": 4.71,
+    "regiones_crudas": 1,
+    "regiones_filtradas": 1,
+    "area_promedio_filtrada": 9410.0,
+    "lbp_bin8_homogeneo_pct": 90.55,
+    "lbp_bin9_rugosidad_pct": 1.58
+  },
+  {
+    "id": 14,
+    "archivo": "foto_piston.jpg",
+    "etiqueta": "Pistón Estándar (foto_piston.jpg)",
+    "dimensiones": [
+      318,
+      730
+    ],
+    "umbral_otsu": 183,
+    "cobertura_objeto_pct": 30.26,
+    "regiones_crudas": 152,
+    "regiones_filtradas": 4,
+    "area_promedio_filtrada": 17454.8,
+    "lbp_bin8_homogeneo_pct": 50.06,
+    "lbp_bin9_rugosidad_pct": 5.74
+  },
+  {
+    "id": 15,
+    "archivo": "pist2.jpg",
+    "etiqueta": "Pistón #2 (pist2.jpg)",
+    "dimensiones": [
+      346,
+      519
+    ],
+    "umbral_otsu": 200,
+    "cobertura_objeto_pct": 28.39,
+    "regiones_crudas": 79,
+    "regiones_filtradas": 1,
+    "area_promedio_filtrada": 50793.0,
+    "lbp_bin8_homogeneo_pct": 60.2,
+    "lbp_bin9_rugosidad_pct": 5.21
+  },
+  {
+    "id": 16,
+    "archivo": "pist3.jpg",
+    "etiqueta": "Pistón #3 (pist3.jpg)",
+    "dimensiones": [
+      424,
+      724
+    ],
+    "umbral_otsu": 174,
+    "cobertura_objeto_pct": 20.33,
+    "regiones_crudas": 26,
+    "regiones_filtradas": 2,
+    "area_promedio_filtrada": 31163.5,
+    "lbp_bin8_homogeneo_pct": 71.71,
+    "lbp_bin9_rugosidad_pct": 3.02
+  },
+  {
+    "id": 17,
+    "archivo": "pist4.jpg",
+    "etiqueta": "Pistón #4 (pist4.jpg)",
+    "dimensiones": [
+      678,
+      452
+    ],
+    "umbral_otsu": 145,
+    "cobertura_objeto_pct": 15.96,
+    "regiones_crudas": 63,
+    "regiones_filtradas": 40,
+    "area_promedio_filtrada": 1215.2,
+    "lbp_bin8_homogeneo_pct": 75.24,
+    "lbp_bin9_rugosidad_pct": 5.04
+  },
+  {
+    "id": 18,
+    "archivo": "pist5.jpg",
+    "etiqueta": "Pistón #5 (pist5.jpg)",
+    "dimensiones": [
+      504,
+      608
+    ],
+    "umbral_otsu": 170,
+    "cobertura_objeto_pct": 12.59,
+    "regiones_crudas": 7,
+    "regiones_filtradas": 2,
+    "area_promedio_filtrada": 19292.5,
+    "lbp_bin8_homogeneo_pct": 81.68,
+    "lbp_bin9_rugosidad_pct": 2.71
+  },
+  {
+    "id": 19,
+    "archivo": "rueda2.jpg",
+    "etiqueta": "Llanta / Rueda #2 (rueda2.jpg)",
+    "dimensiones": [
+      554,
+      554
+    ],
+    "umbral_otsu": 140,
+    "cobertura_objeto_pct": 45.75,
+    "regiones_crudas": 73,
+    "regiones_filtradas": 1,
+    "area_promedio_filtrada": 140251.0,
+    "lbp_bin8_homogeneo_pct": 59.47,
+    "lbp_bin9_rugosidad_pct": 6.45
+  },
+  {
+    "id": 20,
+    "archivo": "rueda3.jpg",
+    "etiqueta": "Llanta / Rueda #3 (rueda3.jpg)",
+    "dimensiones": [
+      554,
+      554
+    ],
+    "umbral_otsu": 151,
+    "cobertura_objeto_pct": 28.11,
+    "regiones_crudas": 62,
+    "regiones_filtradas": 1,
+    "area_promedio_filtrada": 86113.0,
+    "lbp_bin8_homogeneo_pct": 69.8,
+    "lbp_bin9_rugosidad_pct": 5.27
+  },
+  {
+    "id": 21,
+    "archivo": "rueda4.jpg",
+    "etiqueta": "Llanta / Rueda #4 (rueda4.jpg)",
+    "dimensiones": [
+      554,
+      554
+    ],
+    "umbral_otsu": 171,
+    "cobertura_objeto_pct": 37.61,
+    "regiones_crudas": 54,
+    "regiones_filtradas": 4,
+    "area_promedio_filtrada": 28760.0,
+    "lbp_bin8_homogeneo_pct": 54.32,
+    "lbp_bin9_rugosidad_pct": 5.99
+  },
+  {
+    "id": 22,
+    "archivo": "rueda5.jpg",
+    "etiqueta": "Llanta / Rueda #5 (rueda5.jpg)",
+    "dimensiones": [
+      547,
+      365
+    ],
+    "umbral_otsu": 150,
+    "cobertura_objeto_pct": 46.58,
+    "regiones_crudas": 41,
+    "regiones_filtradas": 1,
+    "area_promedio_filtrada": 92939.0,
+    "lbp_bin8_homogeneo_pct": 49.26,
+    "lbp_bin9_rugosidad_pct": 5.6
+  },
+  {
+    "id": 23,
+    "archivo": "silla1.jpg",
+    "etiqueta": "Sillín / Asiento #1 (silla1.jpg)",
+    "dimensiones": [
+      554,
+      554
+    ],
+    "umbral_otsu": 157,
+    "cobertura_objeto_pct": 34.36,
+    "regiones_crudas": 121,
+    "regiones_filtradas": 20,
+    "area_promedio_filtrada": 5201.4,
+    "lbp_bin8_homogeneo_pct": 52.29,
+    "lbp_bin9_rugosidad_pct": 6.08
+  },
+  {
+    "id": 24,
+    "archivo": "silla2.jpg",
+    "etiqueta": "Sillín / Asiento #2 (silla2.jpg)",
+    "dimensiones": [
+      480,
+      638
+    ],
+    "umbral_otsu": 127,
+    "cobertura_objeto_pct": 39.97,
+    "regiones_crudas": 17,
+    "regiones_filtradas": 9,
+    "area_promedio_filtrada": 13598.9,
+    "lbp_bin8_homogeneo_pct": 25.78,
+    "lbp_bin9_rugosidad_pct": 4.69
+  },
+  {
+    "id": 25,
+    "archivo": "silla3.jpg",
+    "etiqueta": "Sillín / Asiento #3 (silla3.jpg)",
+    "dimensiones": [
+      429,
+      713
+    ],
+    "umbral_otsu": 132,
+    "cobertura_objeto_pct": 60.57,
+    "regiones_crudas": 500,
+    "regiones_filtradas": 3,
+    "area_promedio_filtrada": 61385.3,
+    "lbp_bin8_homogeneo_pct": 13.04,
+    "lbp_bin9_rugosidad_pct": 13.22
+  },
+  {
+    "id": 26,
+    "archivo": "silla4.jpg",
+    "etiqueta": "Sillín / Asiento #4 (silla4.jpg)",
+    "dimensiones": [
+      739,
+      415
+    ],
+    "umbral_otsu": 128,
+    "cobertura_objeto_pct": 38.95,
+    "regiones_crudas": 69,
+    "regiones_filtradas": 7,
+    "area_promedio_filtrada": 17021.6,
+    "lbp_bin8_homogeneo_pct": 28.59,
+    "lbp_bin9_rugosidad_pct": 6.32
+  },
+  {
+    "id": 27,
+    "archivo": "silla5.jpg",
+    "etiqueta": "Sillín / Asiento #5 (silla5.jpg)",
+    "dimensiones": [
+      300,
+      300
+    ],
+    "umbral_otsu": 154,
+    "cobertura_objeto_pct": 32.11,
+    "regiones_crudas": 1,
+    "regiones_filtradas": 1,
+    "area_promedio_filtrada": 28901.0,
+    "lbp_bin8_homogeneo_pct": 67.96,
+    "lbp_bin9_rugosidad_pct": 4.39
+  },
+  {
+    "id": 28,
+    "archivo": "susp1.jpg",
+    "etiqueta": "Suspensión #1 (susp1.jpg)",
+    "dimensiones": [
+      500,
+      400
+    ],
+    "umbral_otsu": 173,
+    "cobertura_objeto_pct": 23.41,
+    "regiones_crudas": 29,
+    "regiones_filtradas": 7,
+    "area_promedio_filtrada": 6667.1,
+    "lbp_bin8_homogeneo_pct": 66.71,
+    "lbp_bin9_rugosidad_pct": 3.55
+  },
+  {
+    "id": 29,
+    "archivo": "susp2.jpg",
+    "etiqueta": "Suspensión #2 (susp2.jpg)",
+    "dimensiones": [
+      336,
+      447
+    ],
+    "umbral_otsu": 174,
+    "cobertura_objeto_pct": 12.06,
+    "regiones_crudas": 71,
+    "regiones_filtradas": 13,
+    "area_promedio_filtrada": 1366.5,
+    "lbp_bin8_homogeneo_pct": 70.66,
+    "lbp_bin9_rugosidad_pct": 3.08
+  },
+  {
+    "id": 30,
+    "archivo": "susp3.jpg",
+    "etiqueta": "Suspensión #3 (susp3.jpg)",
+    "dimensiones": [
+      447,
+      447
+    ],
+    "umbral_otsu": 150,
+    "cobertura_objeto_pct": 16.07,
+    "regiones_crudas": 51,
+    "regiones_filtradas": 1,
+    "area_promedio_filtrada": 31941.0,
+    "lbp_bin8_homogeneo_pct": 77.68,
+    "lbp_bin9_rugosidad_pct": 3.15
+  },
+  {
+    "id": 31,
+    "archivo": "susp4.jpg",
+    "etiqueta": "Suspensión #4 (susp4.jpg)",
+    "dimensiones": [
+      450,
+      598
+    ],
+    "umbral_otsu": 150,
+    "cobertura_objeto_pct": 20.16,
+    "regiones_crudas": 32,
+    "regiones_filtradas": 3,
+    "area_promedio_filtrada": 18032.0,
+    "lbp_bin8_homogeneo_pct": 72.62,
+    "lbp_bin9_rugosidad_pct": 3.2
+  },
+  {
+    "id": 32,
+    "archivo": "susp5.jpg",
+    "etiqueta": "Suspensión #5 (susp5.jpg)",
+    "dimensiones": [
+      485,
+      631
+    ],
+    "umbral_otsu": 156,
+    "cobertura_objeto_pct": 14.74,
+    "regiones_crudas": 23,
+    "regiones_filtradas": 8,
+    "area_promedio_filtrada": 5627.9,
+    "lbp_bin8_homogeneo_pct": 69.19,
+    "lbp_bin9_rugosidad_pct": 2.01
+  },
+  {
+    "id": 33,
+    "archivo": "susp6.jpg",
+    "etiqueta": "Suspensión #6 (susp6.jpg)",
+    "dimensiones": [
+      300,
+      207
+    ],
+    "umbral_otsu": 182,
+    "cobertura_objeto_pct": 23.31,
+    "regiones_crudas": 31,
+    "regiones_filtradas": 3,
+    "area_promedio_filtrada": 4743.3,
+    "lbp_bin8_homogeneo_pct": 53.7,
+    "lbp_bin9_rugosidad_pct": 5.9
+  }
+]
