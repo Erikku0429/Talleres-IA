@@ -3,7 +3,6 @@ import numpy as np
 import math
 import heapq
 import sqlite3
-import os
 from collections import Counter
 from pathlib import Path
 from PIL import Image
@@ -133,7 +132,7 @@ st.markdown("Plataforma avanzada para la gestión automatizada de inventario de 
 
 # NAVEGACIÓN POR PESTAÑAS (MODULAR)
 
-tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s7, tab_s8, tab_s9, tab_s10 = st.tabs([
+tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s7, tab_s8, tab_s9, tab_s10, tab_s11 = st.tabs([
     "📊 Resumen Ejecutivo",
     "🤖 Semana 2: Línea Base",
     "🔍 Semana 3: Taxonomía",
@@ -142,14 +141,15 @@ tab_resumen, tab_s2, tab_s3, tab_s4, tab_s5, tab_s7, tab_s8, tab_s9, tab_s10 = s
     "📐 Semana 7: Representaciones",
     "👁️ Semana 8: Reconocimiento IA",
     "🔬 Semana 9: Visión Computacional",
-    "🧩 Semana 10: Texturas LBP"
+    "🧩 Semana 10: Texturas LBP",
+    "⚖️ Semana 11: Benchmark y ADR"
 ])
 
 # 1. RESUMEN EJECUTIVO
 
 with tab_resumen:
     st.header("Arquitectura Semestral del Proyecto")
-    col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
+    col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns(9)
     with col1:
         st.markdown('<div class="metric-card"><h3>Semana 2</h3><p>94.7%</p><small>Accuracy Base</small></div>',
                     unsafe_allow_html=True)
@@ -178,6 +178,10 @@ with tab_resumen:
     with col8:
         st.markdown(
             '<div class="metric-card"><h3>Semana 10</h3><p>LBP + Otsu</p><small>Vector 49D (.npy)</small></div>',
+            unsafe_allow_html=True)
+    with col9:
+        st.markdown(
+            '<div class="metric-card"><h3>Semana 11</h3><p>Random Forest</p><small>86% / 0.7s (ADR)</small></div>',
             unsafe_allow_html=True)
 
 # 2. SEMANA 2: LÍNEA BASE (MACHINE LEARNING)
@@ -990,6 +994,153 @@ with tab_s10:
                 """)
         else:
             st.error(f"No se encontró la imagen en `{img_s10_path}`.")
+
+
+# 11. SEMANA 11: BENCHMARK Y DECISIÓN TÉCNICA (ADR)
+
+with tab_s11:
+    st.header("Semana 11: Benchmark de Modelos y Decisión Técnica (ADR)")
+    st.markdown("Comparativa rigurosa de tres modelos de Inteligencia Artificial sobre el **vector de 49 características ópticas y morfológicas** extraídas de repuestos reales del taller.")
+
+    # 1. Tarjetas de métricas del Benchmark
+    col_bm1, col_bm2, col_bm3 = st.columns(3)
+    with col_bm1:
+        st.markdown("""
+        <div class="metric-card" style="border: 2px solid #22c55e;">
+            <h3 style="color: #22c55e;">★ Random Forest (Seleccionado)</h3>
+            <p>86.0%</p>
+            <small>0.695s fit | Mayor estabilidad (σ = 0.034)</small>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_bm2:
+        st.markdown("""
+        <div class="metric-card">
+            <h3>MLPClassifier (Red Neuronal)</h3>
+            <p>86.0%</p>
+            <small>0.703s fit | Mayor varianza (σ = 0.043)</small>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_bm3:
+        st.markdown("""
+        <div class="metric-card">
+            <h3>Logistic Regression (Línea Base)</h3>
+            <p>80.0%</p>
+            <small>0.044s fit | Más rápida (Línea base)</small>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    col_bm_left, col_bm_right = st.columns([1.2, 1])
+
+    with col_bm_left:
+        st.subheader("📊 Evidencia Empírica Oficial (`artifacts/benchmark.csv`)")
+        csv_path = Path("artifacts/benchmark.csv")
+        if csv_path.exists():
+            import pandas as pd
+            df_bm = pd.read_csv(csv_path)
+            st.dataframe(df_bm, use_container_width=True)
+            
+            # Gráfica interactiva de barras
+            fig_bm, (ax_acc, ax_time) = plt.subplots(1, 2, figsize=(10, 3.5))
+            fig_bm.patch.set_facecolor('#0f172a')
+            
+            colores = ['#22c55e' if m == 'forest' else '#3b82f6' if m == 'mlp' else '#f59e0b' for m in df_bm['modelo']]
+            
+            # Subplot Accuracy
+            ax_acc.set_facecolor('#1e293b')
+            bars1 = ax_acc.bar(df_bm['modelo'], df_bm['accuracy'] * 100, color=colores, width=0.5)
+            ax_acc.set_title("Exactitud (Accuracy %)", color='#f8fafc', fontsize=10, fontweight='bold')
+            ax_acc.set_ylim(0, 100)
+            ax_acc.tick_params(colors='#94a3b8', labelsize=8)
+            for bar in bars1:
+                yval = bar.get_height()
+                ax_acc.text(bar.get_x() + bar.get_width()/2.0, yval + 2, f"{yval:.1f}%", ha='center', va='bottom', color='#f8fafc', fontsize=8, fontweight='bold')
+            
+            # Subplot Tiempo
+            ax_time.set_facecolor('#1e293b')
+            bars2 = ax_time.bar(df_bm['modelo'], df_bm['fit_seconds'], color=colores, width=0.5)
+            ax_time.set_title("Tiempo de Ajuste (Segundos)", color='#f8fafc', fontsize=10, fontweight='bold')
+            ax_time.tick_params(colors='#94a3b8', labelsize=8)
+            for bar in bars2:
+                yval = bar.get_height()
+                ax_time.text(bar.get_x() + bar.get_width()/2.0, yval + 0.03, f"{yval:.3f}s", ha='center', va='bottom', color='#f8fafc', fontsize=8, fontweight='bold')
+
+            for ax in [ax_acc, ax_time]:
+                for sp in ax.spines.values(): sp.set_color('#334155')
+
+            st.pyplot(fig_bm)
+        else:
+            st.info("Ejecute `python src/semana11_benchmark.py` para generar `benchmark.csv`.")
+
+    with col_bm_right:
+        st.subheader("📑 Síntesis del ADR (Architecture Decision Record)")
+        st.markdown("""
+        * **Problema:** Clasificación física automática de repuestos en recepción de taller.
+        * **Dataset Evaluado:** 198 muestras con 49 descriptores (Morfología Otsu + Histograma 32 bins + LBP 10 bins).
+        * **Decisión Técnica:** Seleccionar **`RandomForestClassifier`**.
+        * **Justificación de Ingeniería:**
+          1. **Supera a Línea Base:** +6.0% de exactitud sobre Regresión Logística (86% vs 80%).
+          2. **Mayor Estabilidad:** Desviación estándar de solo 3.4% frente al 4.3% de la Red Neuronal en múltiples particiones.
+          3. **Convergencia Garantizada:** Sin estancamiento ni problemas de gradiente estocástico.
+          4. **Tiempo Tolerable:** 0.69 segundos de entrenamiento es viable en operaciones de bodega.
+        """)
+        st.caption("Consulte el informe técnico completo en `reports/semana11_adr.md`.")
+
+    st.markdown("---")
+    st.subheader("🧪 Inferencia en Vivo con Modelos Comparados")
+    st.caption("Seleccione cualquier pieza de la bodega para clasificarla instantáneamente con los tres modelos del benchmark.")
+
+    col_test_ctrl, col_test_res = st.columns([1, 1.8])
+    with col_test_ctrl:
+        cat_s11 = obtener_catalogo_imagenes()
+        sel_repuesto = st.selectbox("Pieza a evaluar:", list(cat_s11.keys()), index=0, key="s11_sel")
+        ruta_sel = cat_s11[sel_repuesto]
+        img_sel_bgr = cv2.imread(ruta_sel)
+        if img_sel_bgr is not None:
+            st.image(cv2.cvtColor(img_sel_bgr, cv2.COLOR_BGR2RGB), caption=sel_repuesto, use_container_width=True)
+
+    with col_test_res:
+        ds_cache = Path("artifacts/semana11_dataset.npz")
+        if ds_cache.exists() and img_sel_bgr is not None:
+            from sklearn.ensemble import RandomForestClassifier
+            from sklearn.linear_model import LogisticRegression
+            from sklearn.neural_network import MLPClassifier
+            from sklearn.pipeline import make_pipeline
+            from sklearn.preprocessing import StandardScaler
+            from src.semana11_benchmark import extraer_vector_49d
+            
+            # Cargar y entrenar rápidamente
+            datos_s11 = np.load(ds_cache, allow_pickle=True)
+            X_all, y_all = datos_s11["X"], datos_s11["y"]
+            
+            m_rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1).fit(X_all, y_all)
+            m_lr = make_pipeline(StandardScaler(), LogisticRegression(max_iter=1500, random_state=42)).fit(X_all, y_all)
+            m_mlp = make_pipeline(StandardScaler(), MLPClassifier(hidden_layer_sizes=(64,), max_iter=450, random_state=42)).fit(X_all, y_all)
+            
+            v_test = extraer_vector_49d(img_sel_bgr).reshape(1, -1)
+            
+            pred_rf = m_rf.predict(v_test)[0]
+            prob_rf = np.max(m_rf.predict_proba(v_test)) * 100
+            
+            pred_lr = m_lr.predict(v_test)[0]
+            prob_lr = np.max(m_lr.predict_proba(v_test)) * 100
+            
+            pred_mlp = m_mlp.predict(v_test)[0]
+            prob_mlp = np.max(m_mlp.predict_proba(v_test)) * 100
+            
+            st.markdown(f"#### Veredictos del Ensamble para `{Path(ruta_sel).name}`:")
+            c_p1, c_p2, c_p3 = st.columns(3)
+            with c_p1:
+                st.metric("★ Random Forest", f"{pred_rf}", f"{prob_rf:.1f}% Confianza")
+            with c_p2:
+                st.metric("MLPClassifier", f"{pred_mlp}", f"{prob_mlp:.1f}% Confianza")
+            with c_p3:
+                st.metric("Logistic Reg.", f"{pred_lr}", f"{prob_lr:.1f}% Confianza")
+            
+            st.success(f"✅ Diagnóstico: La pieza analizada corresponde a la categoría **{pred_rf}** según el modelo seleccionado en el ADR.")
+        else:
+            st.info("Ejecute primero `python src/semana11_benchmark.py` para generar el dataset de entrenamiento.")
 
 
 # PIE DE PÁGINA

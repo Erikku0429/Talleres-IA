@@ -1,0 +1,4 @@
+modelo,accuracy,fit_seconds
+forest,0.86,0.2511
+mlp,0.86,0.1422
+logistic,0.8,0.0141
